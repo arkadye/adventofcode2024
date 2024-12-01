@@ -7,6 +7,8 @@
 
 static const verification_test tests[] =
 {
+	TESTCASE(day_one_p1_a, 11),
+	TESTCASE(day_one_p2_a, 31),
 	DAY(one,DAY_01_1_SOLUTION,DAY_01_2_SOLUTION),
 	DAY(two,DAY_02_1_SOLUTION,DAY_02_2_SOLUTION),
 	DAY(three,DAY_03_1_SOLUTION,DAY_03_2_SOLUTION),
