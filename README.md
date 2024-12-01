@@ -1,6 +1,9 @@
-# Advent of Code Framework
+# Advent of Code 2024
 
-A framework to build solutions to the Advent of Code competition on. It includes some basic utilities, and a test suite to verify your solutions. Example cases can also be tested.
+My C++ [Advent of Code 2024](https://adventofcode.com/2024/) solutions.
+
+Framework based on [this framework](https://github.com/arkadye/advent_of_code_framework).
+
 
 ## To add solutions
 
