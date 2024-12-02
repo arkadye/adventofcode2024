@@ -45,3 +45,18 @@ static const auto TEST_ONE = advent::combine_inputs<2>(TEST_ONE_A, TEST_ONE_B);
 will set TEXT_ONE to "test1_input\n\ntest2"
 
 */
+
+static const char* DAY_ONE_A = R"(3   4
+4   3
+2   5
+1   3
+3   9
+3   3)";
+
+constexpr const char* DAY_TWO_A = "7 6 4 2 1";
+constexpr const char* DAY_TWO_B = "1 2 7 8 9";
+constexpr const char* DAY_TWO_C = "9 7 6 2 1";
+constexpr const char* DAY_TWO_D = "1 3 2 4 5";
+constexpr const char* DAY_TWO_E = "8 6 4 4 1";
+constexpr const char* DAY_TWO_F = "1 3 6 7 9";
+static const auto DAY_TWO_G = advent::combine_inputs<1>(DAY_TWO_A, DAY_TWO_B, DAY_TWO_C, DAY_TWO_D, DAY_TWO_E, DAY_TWO_F);

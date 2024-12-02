@@ -94,30 +94,13 @@ namespace
 	}
 }
 
-namespace
+ResultType day_one_p1_a(std::istream& input)
 {
-	std::istringstream testcase_a()
-	{
-		return std::istringstream{
-			"3   4\n"
-			"4   3\n"
-			"2   5\n"
-			"1   3\n"
-			"3   9\n"
-			"3   3"
-		};
-	}
-}
-
-ResultType day_one_p1_a()
-{
-	auto input = testcase_a();
 	return solve_p1(input);
 }
 
-ResultType day_one_p2_a()
+ResultType day_one_p2_a(std::istream& input)
 {
-	auto input = testcase_a();
 	return solve_p2(input);
 }
 
