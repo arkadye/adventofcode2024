@@ -35,9 +35,9 @@ namespace
 
 namespace
 {
-	int64_t solve_p2(std::istream& input)
+	std::string solve_p2(std::istream& input)
 	{
-		return 0;
+		return "Merry Christmas!";
 	}
 }
 
