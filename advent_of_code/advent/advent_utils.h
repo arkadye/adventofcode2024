@@ -20,6 +20,7 @@ namespace advent
 			std::cerr << "\nWARNING! File '" << filename << "' is empty.";
 		}
 #endif
+		result.sync_with_stdio(false);
 		return result;
 	}
 
@@ -33,7 +34,7 @@ namespace advent
 	// Open a file with the format "adventX/testcase_Y.txt"
 	inline std::ifstream open_testcase_input(int day, char id)
 	{
-		const std::string name = std::format("advent{0}/testcast_{1}.txt", day, id);
+		const std::string name = std::format("advent{0}/testcase_{1}.txt", day, id);
 		return open_input(name);
 	}
 }
