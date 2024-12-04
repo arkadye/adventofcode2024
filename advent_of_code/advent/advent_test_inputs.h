@@ -60,3 +60,6 @@ constexpr const char* DAY_TWO_D = "1 3 2 4 5";
 constexpr const char* DAY_TWO_E = "8 6 4 4 1";
 constexpr const char* DAY_TWO_F = "1 3 6 7 9";
 static const auto DAY_TWO_G = advent::combine_inputs<1>(DAY_TWO_A, DAY_TWO_B, DAY_TWO_C, DAY_TWO_D, DAY_TWO_E, DAY_TWO_F);
+
+constexpr const char* DAY_THREE_A = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
+constexpr const char* DAY_THREE_B = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
