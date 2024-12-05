@@ -67,6 +67,10 @@ namespace utils
 		NodeType& at(utils::basic_coords<T> coords) { return at(coords.x,coords.y); }
 		template <std::integral T>
 		const NodeType& at(utils::basic_coords<T> coords) const { return at(coords.x,coords.y); }
+		template <std::integral T>
+		NodeType& operator[](utils::basic_coords<T> coords) { return at(coords); }
+		template <std::integral T>
+		const NodeType& operator[](utils::basic_coords<T> coords) const { return at(coords); }
 
 		// Get all nodes that meet a predicate
 		utils::small_vector<utils::coords,1> get_all_coordinates_by_predicate(const auto& predicate) const
