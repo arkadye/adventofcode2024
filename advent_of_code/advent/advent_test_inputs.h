@@ -46,7 +46,8 @@ will set TEXT_ONE to "test1_input\n\ntest2"
 
 */
 
-static const char* DAY_ONE_A = R"(3   4
+constexpr const char* DAY_ONE_A = 
+R"(3   4
 4   3
 2   5
 1   3
@@ -63,3 +64,51 @@ static const auto DAY_TWO_G = advent::combine_inputs<1>(DAY_TWO_A, DAY_TWO_B, DA
 
 constexpr const char* DAY_THREE_A = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
 constexpr const char* DAY_THREE_B = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
+
+constexpr const char* DAY_FOUR_A =
+R"(..X...
+.SAMX.
+.A..A.
+XMAS.S
+.X....)";
+
+constexpr const char* DAY_FOUR_B =
+R"(MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX)";
+
+constexpr const char* DAY_FOUR_C =
+R"(MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX)";
+
+constexpr const char* DAY_FOUR_D =
+R"(M.S
+.A.
+M.S)";
+
+constexpr const char* DAY_FOUR_E =
+R"(.M.S......
+..A..MSMS.
+.M.S.MAA..
+..A.ASMSM.
+.M.S.M....
+..........
+S.S.S.S.S.
+.A.A.A.A..
+M.M.M.M.M.
+..........)";
