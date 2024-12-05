@@ -476,7 +476,7 @@ namespace utils
 		{
 			if constexpr (can_fill_with_memset())
 			{
-				memset_buffer(memory.get_unified_memory(), value);
+				memset_buffer(memory.get_unified_buffer(), value);
 			}
 			fill_initialised_memory(memory.initialised_memory, value);
 			fill_raw_memory(memory.uninitialised_memory, value);
@@ -802,7 +802,7 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator ut
 	{
 		pos = insert(pos, *it);
 	}
-	return pos;
+	return const_cast<iterator>(pos);
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
