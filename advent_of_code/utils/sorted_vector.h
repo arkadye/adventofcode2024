@@ -231,19 +231,19 @@ namespace utils
 
 		void erase(const_iterator pos)
 		{
-			assert(m_sorted);
+			AdventCheck(m_sorted);
 			m_data.erase(pos);
 		}
 
 		void erase(const_iterator start, const_iterator finish)
 		{
-			assert(m_sorted);
+			AdventCheck(m_sorted);
 			m_data.erase(start, finish);
 		}
 
 		void erase_fast(const_iterator pos)
 		{
-			assert(m_sorted);
+			AdventCheck(m_sorted);
 			if (pos != (end() - 1))
 			{
 				const auto idx = std::distance(cbegin(), pos);
@@ -294,7 +294,7 @@ namespace utils
 		template <typename InputIterator>
 		void insert(InputIterator first, InputIterator last)
 		{
-			m_data.insert(end(m_data), first, last);
+			m_data.insert(m_data.end(), first, last);
 			m_sorted = false;
 		}
 
