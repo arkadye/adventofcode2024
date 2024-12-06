@@ -123,6 +123,7 @@ set( UTILS_FILES
 	"utils/isqrt.h"
 	"utils/istream_block_iterator.h"
 	"utils/istream_line_iterator.h"
+	"utils/line.h"
 	"utils/md5.h"
 	"utils/modular_int.h"
 	"utils/parse_utils.h"
