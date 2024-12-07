@@ -62,7 +62,7 @@ namespace utils
 	public:
 		using coord_type = CoordsT;
 		using elem_type = decltype(CoordsT{}.x);
-		line(CoordsT one_end, CoordsT other_end) noexcept
+		line(coord_type one_end, coord_type other_end) noexcept
 			: a{ std::min(one_end.x,other_end.x), std::min(one_end.y, other_end.y) }
 			, b{ std::max(one_end.x,other_end.x), std::max(one_end.y, other_end.y) }
 		{
@@ -108,9 +108,28 @@ namespace utils
 			return std::nullopt;
 		}
 
-		elem_type length() const
+		bool is_on_line(coord_type other) const
+		{
+			const std::optional<line> crossing_result = get_crossing(line{ other,other });
+			return crossing_result.has_value();
+		}
+
+		coord_type operator[](std::size_t idx) const
+		{
+			AdventCheck(idx < size());
+			coord_type result = a;
+			(is_vertical() ? result.y : result.x) += static_cast<elem_type>(idx);
+			return result;
+		}
+
+		elem_type length() const noexcept
 		{
 			return elem_type{ 1 } + (is_vertical() ? (b.y - a.y) : (b.x - a.x));
+		}
+
+		std::size_t size() const noexcept
+		{
+			return static_cast<std::size_t>(length());
 		}
 
 		bool is_vertical() const
