@@ -155,3 +155,14 @@ R"(....#.....
 #.........
 ......#...)";
 
+constexpr const char* DAY_SEVEN_A = "190: 10 19";
+constexpr const char* DAY_SEVEN_B = "3267 : 81 40 27";
+constexpr const char* DAY_SEVEN_C = "83 : 17 5";
+constexpr const char* DAY_SEVEN_D = "156 : 15 6";
+constexpr const char* DAY_SEVEN_E = "7290 : 6 8 6 15";
+constexpr const char* DAY_SEVEN_F = "161011 : 16 10 13";
+constexpr const char* DAY_SEVEN_G = "192 : 17 8 14";
+constexpr const char* DAY_SEVEN_H = "21037 : 9 7 18 13";
+constexpr const char* DAY_SEVEN_I = "292 : 11 6 16 20";
+
+static const auto DAY_SEVEN_J = advent::combine_inputs<1>(DAY_SEVEN_A, DAY_SEVEN_B, DAY_SEVEN_C, DAY_SEVEN_D, DAY_SEVEN_E, DAY_SEVEN_F, DAY_SEVEN_G, DAY_SEVEN_H, DAY_SEVEN_I);
