@@ -30,6 +30,7 @@ namespace
 #include "string_line_iterator.h"
 #include "istream_line_iterator.h"
 #include "to_value.h"
+#include "int_range.h"
 
 namespace
 {
@@ -64,60 +65,62 @@ namespace
 	template <AdventDay Day>
 	constexpr auto get_ops_list() {}
 
-	template <>
-	constexpr auto get_ops_list<AdventDay::one>()
+	std::size_t count_digits(uint64_t num)
 	{
-		return std::array<Operation, 2>{ Operation::mul ,Operation::add };
-	}
-
-	template <>
-	constexpr auto get_ops_list<AdventDay::two>()
-	{
-		return std::array<Operation, 3>{ Operation::cat, Operation::mul, Operation::add };
+		const std::size_t max = std::numeric_limits<uint64_t>::digits10;
+		uint64_t limit = 10;
+		for (auto result : utils::int_range<std::size_t>{1,max})
+		{
+			if (num < limit) return result;
+			limit *= 10;
+		}
+		return max;
 	}
 
 	template <AdventDay Day>
-	bool has_solution_impl(TargetType target, TargetType partial_solution, ValueList::const_iterator vals_begin, ValueList::const_iterator vals_end)
+	bool has_solution_impl(TargetType partial_solution, ValueList::const_reverse_iterator vals_begin, ValueList::const_reverse_iterator vals_end)
 	{
-		if (vals_begin == vals_end) return (target == partial_solution);
-		if (partial_solution > target) return false;
+		if (vals_begin == vals_end) return (partial_solution == TargetType{ 0 });
+		if (partial_solution < 0) return false;
 
-		constexpr auto ops = get_ops_list<Day>();
-		const ValueType val = *vals_begin;
-		for (Operation op : ops)
+		const ValueType value = *vals_begin;
+
+		// Unconcat.
+		if constexpr (Day == AdventDay::two)
 		{
-			const TargetType candidate = [partial_solution, val, op]()
-				{
-					switch (op)
-					{
-					case Operation::add:
-						return partial_solution + val;
-					case Operation::mul:
-						return partial_solution * val;
-					case Operation::cat:
-						AdventCheck(Day == AdventDay::two);
-						return utils::to_value<TargetType>(std::to_string(partial_solution) + std::to_string(val));
-					default:
-						AdventUnreachable();
-						break;
-					}
-					return TargetType{};
-				}();
-
-			const bool correct = has_solution_impl<Day>(target, candidate, vals_begin + 1, vals_end);
-			if (correct)
+			const std::size_t digits = count_digits(value);
+			const TargetType mod_arg = static_cast<TargetType>(std::pow(10, digits));
+			if (partial_solution > mod_arg)
 			{
-				return true;
+				const TargetType mod = partial_solution % mod_arg;
+				if (mod == value)
+				{
+					const TargetType candidate = partial_solution / mod_arg;
+					const bool solved = has_solution_impl<Day>(candidate, vals_begin + 1, vals_end);
+					if (solved) return true;
+				}
 			}
 		}
-		return false;
+
+		// Unmultiply
+		if (partial_solution % value == 0)
+		{
+			const TargetType candidate = partial_solution / value;
+			const bool solved = has_solution_impl<Day>(candidate, vals_begin + 1, vals_end);
+			if (solved) return true;
+		}
+
+		// Unadd
+		const TargetType candidate = partial_solution - value;
+		const bool solved = has_solution_impl<Day>(candidate, vals_begin + 1, vals_end);
+		return solved;
 	}
 
 	template <AdventDay Day>
 	bool has_solution(const Puzzle& puzzle)
 	{
 		AdventCheck(!puzzle.numbers.empty());
-		return has_solution_impl<Day>(puzzle.target, puzzle.numbers.front(), cbegin(puzzle.numbers) + 1, cend(puzzle.numbers));
+		return has_solution_impl<Day>(puzzle.target, crbegin(puzzle.numbers), crend(puzzle.numbers));
 	}
 
 	template <AdventDay Day>
