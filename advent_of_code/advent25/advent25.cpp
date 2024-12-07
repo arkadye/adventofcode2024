@@ -37,7 +37,7 @@ namespace
 {
 	std::string solve_p2(std::istream& input)
 	{
-		return "Merry Christmas!";
+		return "MERRY CHRISTMAS!";
 	}
 }
 
