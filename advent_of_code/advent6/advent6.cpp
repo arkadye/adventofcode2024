@@ -28,7 +28,9 @@ namespace
 #include "sorted_vector.h"
 #include "Coords.h"
 #include "line.h"
+#include "transform_if.h"
 
+#include <execution>
 #include <map>
 #include <vector>
 
@@ -37,7 +39,8 @@ namespace
 	using CoordType = uint8_t; // Range is 0-130.
 	using Coords = utils::basic_coords<CoordType>;
 	using Dir = utils::direction;
-	using Path = std::vector<utils::line<Coords>>;
+	using Line = utils::line<Coords>;
+	using Path = std::vector<Line>;
 
 	// This is a line. We store it in a map. If the key is the column index this will be row index of all obstacles in that line.
 	using MapSegment = utils::sorted_vector<CoordType>;
@@ -73,6 +76,7 @@ namespace
 			}
 		}
 	public:
+		Coords get_guard_start_location() const { return guard_location; }
 		void add_obstacle(Coords c)
 		{
 			AdventCheck(c != guard_location);
@@ -94,13 +98,24 @@ namespace
 			guard_direction = dir;
 		}
 
-		Path create_guard_path() const
+		// If this returns nullopt it's because it looped.
+		std::optional<Path> create_guard_path() const
 		{
+			utils::sorted_vector<std::pair<Coords, Dir>> loop_detector;
 			Coords gl = guard_location;
 			Dir gd = guard_direction;
 			Path result;
 			while (true)
 			{
+				{
+					const std::pair ref{ gl,gd };
+					auto loop_detection_result = loop_detector.lower_bound(ref);
+					if (loop_detection_result != end(loop_detector) && *loop_detection_result == ref)
+					{
+						return std::nullopt;
+					}
+					loop_detector.insert(loop_detection_result, ref);
+				}
 				Coords move_start = gl;
 				const bool guard_moving_horizontally = utils::is_horizontal(gd);
 				const Map& map = guard_moving_horizontally ? row_major : column_major;
@@ -258,23 +273,89 @@ namespace
 	int64_t solve_p1(std::istream& input)
 	{
 		const GameState state = parse_game_state(input);
-		const Path path = state.create_guard_path();
-		const std::size_t result = get_path_coverage(path);
+		const std::optional<Path> path = state.create_guard_path();
+		AdventCheck(path.has_value());
+		const std::size_t result = get_path_coverage(path.value());
 		return result;
 	}
 }
 
 namespace
 {
+	bool has_loop(const GameState& state)
+	{
+		const std::optional<Path> path = state.create_guard_path();
+		return !path.has_value();
+	}
+
+	bool has_loop_with_obstacle(GameState state, Coords new_obstacle)
+	{
+		AdventCheck(new_obstacle != state.get_guard_start_location());
+		state.add_obstacle(new_obstacle);
+		return has_loop(state);
+	}
+
+	int64_t count_locations_to_add_obstacles_on_line(const GameState& state, const Path& path, std::size_t line_idx)
+	{
+		AdventCheck(line_idx < path.size());
+		const Line line = path[line_idx];
+		const std::vector<Line> crossings = [&line,line_idx,&path]()
+			{
+				std::vector<Line> result;
+				result.reserve(line_idx);
+				for (std::size_t test_idx : utils::int_range{ line_idx })
+				{
+					const Line& test_line = path[test_idx];
+					if (const std::optional<Line> crossing = line.get_crossing(test_line))
+					{
+						result.push_back(crossing.value());
+					}
+				}
+				return result;
+			}();
+
+		auto already_checked = [&crossings](Coords location)
+			{
+				return stdr::any_of(crossings, [location](Line l) {return l.is_on_line(location); });
+			};
+
+		auto can_add_obstacle = [&already_checked,&state,&line](std::size_t idx)
+			{
+				const Coords obstacle_loc = line[idx];
+				if (obstacle_loc == state.get_guard_start_location()) return false;
+				if (already_checked(obstacle_loc)) return false;
+				return has_loop_with_obstacle(state, obstacle_loc);
+			};
+
+		const utils::int_range line_range{ line.size() };
+		const int64_t result = std::count_if(std::execution::par_unseq, begin(line_range), end(line_range), can_add_obstacle);
+		return result;
+	}
+
 	int64_t solve_p2(std::istream& input)
 	{
-		return 0;
+		const GameState state = parse_game_state(input);
+		const std::optional<Path> o_unlooped_path = state.create_guard_path();
+		AdventCheck(o_unlooped_path.has_value());
+		const Path& path = o_unlooped_path.value();
+		const utils::int_range path_range{ path.size() };
+		auto count_positions = [&state, &path](std::size_t path_idx)
+			{
+				return count_locations_to_add_obstacles_on_line(state, path, path_idx);
+			};
+		const int64_t result = std::transform_reduce(std::execution::par_unseq, begin(path_range), end(path_range), int64_t{ 0 }, std::plus<int64_t>{}, count_positions);
+		return result;
 	}
 }
 
 ResultType day_six_p1_a(std::istream& input)
 {
 	return solve_p1(input);
+}
+
+ResultType day_six_p2_a(std::istream& input)
+{
+	return solve_p2(input);
 }
 
 ResultType advent_six_p1()
