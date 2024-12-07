@@ -34,11 +34,7 @@ namespace
 
 namespace
 {
-#if DAY6DBG
-	using CoordType = int16_t; // So it appears in the debugger correctly.
-#else
-	using CoordType = int8_t; // Range is 0-130.
-#endif
+	using CoordType = uint8_t; // Range is 0-130.
 	using Coords = utils::basic_coords<CoordType>;
 	using Dir = utils::direction;
 	using Path = std::vector<utils::line<Coords>>;
@@ -55,9 +51,6 @@ namespace
 		Coords guard_location;
 		Dir guard_direction;
 		Coords limit;
-#if DAY6DBG
-		bool guard_placed = false;
-#endif
 
 		static bool has_obstacle(const Map& map, CoordType major, CoordType minor)
 		{
@@ -83,8 +76,8 @@ namespace
 		void add_obstacle(Coords c)
 		{
 			AdventCheck(c != guard_location);
-			add_obstacle(row_major, c.x, c.y);
-			add_obstacle(column_major, c.y, c.x);
+			add_obstacle(row_major, c.y, c.x);
+			add_obstacle(column_major, c.x, c.y);
 		}
 
 		bool has_obstacle(Coords c) const
@@ -99,10 +92,6 @@ namespace
 			AdventCheck(!has_obstacle(c));
 			guard_location = c;
 			guard_direction = dir;
-#if DAY6DBG
-			AdventCheck(!guard_placed);
-			guard_placed = true;
-#endif
 		}
 
 		Path create_guard_path() const
@@ -113,12 +102,12 @@ namespace
 			while (true)
 			{
 				Coords move_start = gl;
-				const bool guard_moving_horizontally = utils::is_horizontal(guard_direction);
+				const bool guard_moving_horizontally = utils::is_horizontal(gd);
 				const Map& map = guard_moving_horizontally ? row_major : column_major;
-				const bool guard_ascending = utils::is_ascending(guard_direction);
+				const bool guard_ascending = utils::is_ascending(gd);
 
-				CoordType& stable_coord = guard_moving_horizontally ? gl.x : gl.y;
-				CoordType& moving_coord = guard_moving_horizontally ? gl.y : gl.x;
+				const CoordType& stable_coord = guard_moving_horizontally ? gl.y : gl.x;
+				CoordType& moving_coord = guard_moving_horizontally ? gl.x : gl.y;
 
 				auto minor_it = map.find(stable_coord);
 				bool blocked = false;
@@ -138,7 +127,7 @@ namespace
 					else
 					{
 						const auto blocker_it = stdr::upper_bound(stdv::reverse(obstacles), moving_coord, std::greater<CoordType>{});
-						if (blocker_it == rend(obstacles))
+						if (blocker_it != rend(obstacles))
 						{
 							moving_coord = (*blocker_it) + 1;
 							gd = utils::rotate(gd, utils::turn_dir::clockwise);
@@ -178,7 +167,6 @@ namespace
 						}
 					}
 				};
-			AdventCheck(guard_placed);
 			AdventCheck(!has_obstacle(row_major, guard_location.x, guard_location.y));
 			AdventCheck(!has_obstacle(column_major, guard_location.y, guard_location.x));
 			compare(column_major, row_major, limit.x, limit.y);
@@ -189,36 +177,64 @@ namespace
 
 	GameState parse_game_state(std::istream& input)
 	{
-		GameState result;
-		Coords current_location{ 0,0 };
-		while (true)
-		{
-			const char c = input.get();
-			switch (c)
+		std::vector<Coords> obstacles;
+		Coords limit;
+		Coords guard_start;
+		auto parse = [&obstacles, &limit, &guard_start, &input]()
 			{
-			case EOF:
-				result.set_limit(current_location + Coords{ 1,1 });
-				result.validate();
-				return result;
-			case '\n':
-				current_location.x = 0;
-				++current_location.y;
-				continue;
-			case '#':
-				result.add_obstacle(current_location);
-				break;
-			case '^':
-				result.add_guard(current_location, Dir::down); // Down in y-coordinate terms.
-				break;
-			case '.':
-				break;
-			default:
+				Coords current_location{ 0,0 };
+				bool guard_found = false;
+				while (true)
+				{
+					const char c = input.get();
+					switch (c)
+					{
+					case EOF:
+						AdventCheck(guard_found);
+						limit = current_location;
+						return;
+					case '\n':
+						current_location.x = 0;
+						++current_location.y;
+						continue;
+					case '#':
+						obstacles.push_back(current_location);
+						break;
+					case '^':
+						AdventCheck(!guard_found);
+						guard_start = current_location;
+						guard_found = true;
+						break;
+					case '.':
+						break;
+					default:
+						AdventUnreachable();
+						break;
+					}
+					++current_location.x;
+				}
 				AdventUnreachable();
-				break;
-			}
-			++current_location.x;
+				return;
+			};
+
+		parse();
+
+		auto convert_loc = [y = limit.y](Coords c)
+			{
+				c.y = y - c.y;
+				return c;
+			};
+
+		GameState result;
+		for (Coords& obstacle : obstacles)
+		{
+			obstacle = convert_loc(obstacle);
+			result.add_obstacle(obstacle);
 		}
-		AdventUnreachable();
+
+		result.add_guard(convert_loc(guard_start), Dir::up);
+		result.set_limit(limit + Coords{ 1,1 });
+		result.validate();
 		return result;
 	}
 
