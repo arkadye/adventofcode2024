@@ -40,7 +40,7 @@ namespace utils
 			, m_compare(compare)
 			, m_sorted(true)
 		{
-			assert(m_data.empty());
+			AdventCheck(m_data.empty());
 		}
 		template <typename InputIt>
 		sorted_vector(InputIt start, InputIt finish) : sorted_vector(start, finish, BinaryPred{}) {}
