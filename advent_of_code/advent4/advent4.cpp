@@ -61,7 +61,7 @@ namespace
 				const bool result = has_string_at_point_in_dir(grid, target, location, dir);
 				if (result)
 				{
-					log << "\nFound '" << target << "' at loc=(" << location << ") & dir=(" << dir << ')';
+					log << "\nFound '" << target << "' at loc=" << location << " & dir=" << dir;
 				}
 				return result;
 			});
@@ -109,7 +109,7 @@ namespace
 		const bool result = lines_found >= 2;
 		if (result)
 		{
-			log << "\nFound crosses at (" << location << "). Num=" << result
+			log << "\nFound crosses at " << location << ". Num=" << result
 				<< "\n    " << grid[location + utils::coords{ -1,1 }] << grid[location + utils::coords{ 0,1 }] << grid[location + utils::coords{ 1,1 }]
 				<< "\n    " << grid[location + utils::coords{ -1,0 }] << grid[location + utils::coords{ 0,0 }] << grid[location + utils::coords{ 1,0 }]
 				<< "\n    " << grid[location + utils::coords{ -1,-1 }] << grid[location + utils::coords{ 0,-1 }] << grid[location + utils::coords{ 1,-1 }];

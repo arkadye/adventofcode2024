@@ -343,7 +343,7 @@ namespace utils
 	template <typename T>
 	inline std::ostream& operator<<(std::ostream& out, const basic_coords<T>& c)
 	{
-		out << c.x << " , " << c.y;
+		out << '(' << c.x << "," << c.y << ')';
 		return out;
 	}
 
