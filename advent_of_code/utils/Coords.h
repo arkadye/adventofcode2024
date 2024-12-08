@@ -343,6 +343,11 @@ namespace utils
 	template <typename T>
 	inline std::ostream& operator<<(std::ostream& out, const basic_coords<T>& c)
 	{
+		if constexpr (std::is_integral_v<T> && sizeof(T) == 1) // Make sure chars are output as ints
+		{
+			const basic_coords<int16_t> dummy{ c.x, c.y };
+			return operator<<(out, dummy);
+		}
 		out << '(' << c.x << "," << c.y << ')';
 		return out;
 	}
