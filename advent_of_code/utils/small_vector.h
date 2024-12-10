@@ -10,6 +10,30 @@
 
 #include "advent/advent_assert.h"
 
+#define WITH_SMALL_VECTOR_DEBUG_INFO 0
+
+#ifdef FORCE_SMALL_VECTOR_DEBUG_INFO
+#define SMALL_VECTOR_DEBUG_INFO_ENABLED 1
+#elif WITH_SMALL_VECTOR_DEBUG_INFO
+#ifdef NDEBUG
+#define SMALL_VECTOR_DEBUG_INFO_ENABLED 0
+#else
+#define SMALL_VECTOR_DEBUG_INFO_ENABLED WITH_SMALL_VECTOR_DEBUG_INFO
+#endif
+#endif
+
+#if SMALL_VECTOR_DEBUG_INFO_ENABLED
+#define CONSTEXPR
+#else
+#define CONSTEXPR constexpr
+#endif
+
+#if SMALL_VECTOR_DEBUG_INFO_ENABLED
+#include <iostream>
+#include <format>
+#include <string>
+#endif
+
 namespace utils
 {
 	template <typename T, std::size_t STACK_SIZE, typename ALLOC = std::allocator<T>>
@@ -31,43 +55,43 @@ namespace utils
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 		// Constructors
-		constexpr small_vector() noexcept(noexcept(allocator_type())) : small_vector(allocator_type()) {}
-		constexpr explicit small_vector(const allocator_type& alloc) noexcept;
-		constexpr small_vector(size_type count, const T& init, const allocator_type& alloc = allocator_type());
-		constexpr explicit small_vector(size_type count, const allocator_type& alloc = allocator_type());
+		CONSTEXPR small_vector() noexcept(noexcept(allocator_type())) : small_vector(allocator_type()) {}
+		CONSTEXPR explicit small_vector(const allocator_type& alloc) noexcept;
+		CONSTEXPR small_vector(size_type count, const T& init, const allocator_type& alloc = allocator_type());
+		CONSTEXPR explicit small_vector(size_type count, const allocator_type& alloc = allocator_type());
 		template <std::input_iterator InputIt>
-		constexpr small_vector(InputIt first, InputIt last, const allocator_type& alloc = allocator_type());
-		constexpr small_vector(const small_vector& other);
-		constexpr small_vector(const small_vector& other, const allocator_type& alloc);
-		constexpr small_vector(small_vector&& other) noexcept(std::is_nothrow_move_constructible_v<T>);
-		constexpr small_vector(small_vector&& other, const allocator_type& alloc);
-		constexpr small_vector(std::initializer_list<T> init, const allocator_type& alloc = allocator_type());
+		CONSTEXPR small_vector(InputIt first, InputIt last, const allocator_type& alloc = allocator_type());
+		CONSTEXPR small_vector(const small_vector& other);
+		CONSTEXPR small_vector(const small_vector& other, const allocator_type& alloc);
+		CONSTEXPR small_vector(small_vector&& other) noexcept(std::is_nothrow_move_constructible_v<T>);
+		CONSTEXPR small_vector(small_vector&& other, const allocator_type& alloc);
+		CONSTEXPR small_vector(std::initializer_list<T> init, const allocator_type& alloc = allocator_type());
 		~small_vector();
 
 		// Assignment
-		constexpr small_vector& operator=(const small_vector& other);
-		constexpr small_vector& operator=(small_vector&& other) noexcept(std::is_nothrow_move_assignable_v<T> && std::is_nothrow_move_constructible_v<T>);
-		constexpr small_vector& operator=(std::initializer_list<T> init);
+		CONSTEXPR small_vector& operator=(const small_vector& other);
+		CONSTEXPR small_vector& operator=(small_vector&& other) noexcept(std::is_nothrow_move_assignable_v<T> && std::is_nothrow_move_constructible_v<T>);
+		CONSTEXPR small_vector& operator=(std::initializer_list<T> init);
 
-		constexpr void assign(size_type count, const T& value);
+		CONSTEXPR void assign(size_type count, const T& value);
 		template <std::input_iterator InputIt >
-		constexpr void assign(InputIt first, InputIt last);
-		constexpr void assign(std::initializer_list<T> init);
+		CONSTEXPR void assign(InputIt first, InputIt last);
+		CONSTEXPR void assign(std::initializer_list<T> init);
 
 		// Allocator
-		constexpr allocator_type get_allocator() const noexcept { return allocator_type(); }
+		CONSTEXPR allocator_type get_allocator() const noexcept { return allocator_type(); }
 
 		// Element access
-		constexpr reference at(size_type pos);
-		constexpr const_reference at(size_type pos) const;
-		constexpr reference operator[](size_type pos);
-		constexpr const_reference operator[](size_type pos) const;
-		constexpr reference front();
-		constexpr const_reference front() const;
-		constexpr reference back();
-		constexpr const_reference back() const;
-		constexpr T* data() noexcept;
-		constexpr const T* data() const noexcept;
+		CONSTEXPR reference at(size_type pos);
+		CONSTEXPR const_reference at(size_type pos) const;
+		CONSTEXPR reference operator[](size_type pos);
+		CONSTEXPR const_reference operator[](size_type pos) const;
+		CONSTEXPR reference front();
+		CONSTEXPR const_reference front() const;
+		CONSTEXPR reference back();
+		CONSTEXPR const_reference back() const;
+		CONSTEXPR T* data() noexcept;
+		CONSTEXPR const T* data() const noexcept;
 
 		// Iterators
 		[[nodiscard]] iterator begin() noexcept { return data(); }
@@ -84,41 +108,47 @@ namespace utils
 		[[nodiscard]] const_reverse_iterator crend() const noexcept { return std::make_reverse_iterator(cbegin()); }
 
 		// Capacity
-		[[nodiscard]] constexpr bool empty() const noexcept { return size() == 0; }
-		[[nodiscard]] constexpr size_type size() const noexcept { return m_num_elements; }
-		[[nodiscard]] constexpr size_type max_size() const noexcept;
-		constexpr void reserve(size_type new_cap);
-		[[nodiscard]] constexpr size_type capacity() const noexcept { return m_capacity; }
-		constexpr void shrink_to_fit();
+		[[nodiscard]] CONSTEXPR bool empty() const noexcept { return size() == 0; }
+		[[nodiscard]] CONSTEXPR size_type size() const noexcept { return m_num_elements; }
+		[[nodiscard]] CONSTEXPR size_type max_size() const noexcept;
+		CONSTEXPR void reserve(size_type new_cap);
+		[[nodiscard]] CONSTEXPR size_type capacity() const noexcept { return m_capacity; }
+		CONSTEXPR void shrink_to_fit();
 
 		// Modifiers
-		constexpr void clear() noexcept;
-		constexpr iterator insert(const_iterator pos, const T& value) { return insert(pos, 1, value); }
-		constexpr iterator insert(const_iterator pos, T&& value);
-		constexpr iterator insert(const_iterator pos, size_type count, const T& value);
+		CONSTEXPR void clear() noexcept;
+		CONSTEXPR iterator insert(const_iterator pos, const T& value) { return insert(pos, 1, value); }
+		CONSTEXPR iterator insert(const_iterator pos, T&& value);
+		CONSTEXPR iterator insert(const_iterator pos, size_type count, const T& value);
 		template <std::input_iterator InputIt>
-		constexpr iterator insert(const_iterator pos, InputIt first, InputIt last);
-		constexpr iterator insert(const_iterator pos, std::initializer_list<T> init);
+		CONSTEXPR iterator insert(const_iterator pos, InputIt first, InputIt last);
+		CONSTEXPR iterator insert(const_iterator pos, std::initializer_list<T> init);
 		template <typename ...Args>
-		constexpr iterator emplace(const_iterator pos, Args&& ... args);
-		constexpr iterator erase(const_iterator pos) { return erase(pos, pos + 1); }
-		constexpr iterator erase(const_iterator first, const_iterator last);
-		constexpr void push_back(const T& value) { emplace_back(value); }
-		constexpr void push_back(T&& value) { emplace_back(std::forward<T>(value)); }
+		CONSTEXPR iterator emplace(const_iterator pos, Args&& ... args);
+		CONSTEXPR iterator erase(const_iterator pos) { return erase(pos, pos + 1); }
+		CONSTEXPR iterator erase(const_iterator first, const_iterator last);
+		CONSTEXPR void push_back(const T& value) { emplace_back(value); }
+		CONSTEXPR void push_back(T&& value) { emplace_back(std::forward<T>(value)); }
 		template <typename ...Args>
-		constexpr reference emplace_back(Args&&...args);
-		constexpr void pop_back();
-		constexpr void resize(size_type count) { resize(count, T()); }
-		constexpr void resize(size_type count, const T& value);
-		constexpr void swap(small_vector& other) noexcept;
+		CONSTEXPR reference emplace_back(Args&&...args);
+		CONSTEXPR void pop_back();
+		CONSTEXPR void resize(size_type count) { resize(count, T()); }
+		CONSTEXPR void resize(size_type count, const T& value);
+		CONSTEXPR void swap(small_vector& other) noexcept;
 
 	private:
+#if SMALL_VECTOR_DEBUG_INFO_ENABLED
+		static constexpr int DEBUG_SAFETY_BUFFER = 1;
+		static constexpr int DEAD_MEM = 0xAD;
+#else
+		static constexpr int DEBUG_SAFETY_BUFFER = 0;
+#endif
 		constexpr static std::size_t stack_buffer_size() noexcept
 		{
-			constexpr std::size_t min_storage = sizeof(T*) / sizeof(T);
+			CONSTEXPR std::size_t min_storage = sizeof(T*) / sizeof(T);
 			return min_storage > STACK_SIZE ? min_storage : STACK_SIZE;
 		}
-		constexpr void grow(std::size_t min_capacity)
+		CONSTEXPR void grow(std::size_t min_capacity)
 		{
 			if (min_capacity <= capacity())
 			{
@@ -134,7 +164,7 @@ namespace utils
 
 		struct alignas(T) stack_buffer_t
 		{
-			std::byte memory[sizeof(T) * stack_buffer_size()];
+			std::byte memory[sizeof(T) * (stack_buffer_size() + DEBUG_SAFETY_BUFFER)];
 		};
 
 		union data_access
@@ -143,12 +173,12 @@ namespace utils
 			T* heap_data;
 		};
 
-		constexpr T* get_stack_buffer() noexcept
+		CONSTEXPR T* get_stack_buffer() noexcept
 		{
 			return reinterpret_cast<T*>(m_data.stack_buffer.memory);
 		}
 
-		constexpr const T* get_stack_buffer() const noexcept
+		CONSTEXPR const T* get_stack_buffer() const noexcept
 		{
 			return reinterpret_cast<const T*>(m_data.stack_buffer.memory);
 		}
@@ -157,12 +187,12 @@ namespace utils
 		std::size_t m_num_elements;
 		std::size_t m_capacity;
 
-		constexpr bool using_heap() const noexcept
+		CONSTEXPR bool using_heap() const noexcept
 		{
 			return m_capacity > stack_buffer_size();
 		}
 
-		constexpr bool using_stack() const
+		CONSTEXPR bool using_stack() const
 		{
 			return !using_heap();
 		}
@@ -180,8 +210,8 @@ namespace utils
 			U* finish;
 			BasicBuffer(U* init_start, U* init_finish) : start{ init_start }, finish{ init_finish }{}
 			BasicBuffer() : BasicBuffer{ nullptr,nullptr } {}
-			constexpr std::size_t size() const noexcept { return std::distance(start, finish); }
-			constexpr bool empty() const noexcept { return start == finish; }
+			CONSTEXPR std::size_t size() const noexcept { return std::distance(start, finish); }
+			CONSTEXPR bool empty() const noexcept { return start == finish; }
 			U* begin() { return start; }
 			U* end() { return finish; }
 		};
@@ -199,18 +229,18 @@ namespace utils
 			RawMemory(Buffer init) : Buffer(init) {}
 		};
 
-		constexpr InitialisedBuffer get_initialised_memory() noexcept
+		CONSTEXPR InitialisedBuffer get_initialised_memory() noexcept
 		{
 			return InitialisedBuffer{ begin(),end() };
 		}
 
-		constexpr RawMemory get_unitialised_memory() noexcept
+		CONSTEXPR RawMemory get_unitialised_memory() noexcept
 		{
 			return RawMemory{ end(),begin() + capacity() };
 		}
 
 		template <typename Op>
-		constexpr static void buffer_pair_operation(Buffer a_buf, Buffer b_buf, const Op& operation)
+		CONSTEXPR static void buffer_pair_operation(Buffer a_buf, Buffer b_buf, const Op& operation)
 		{
 			AdventCheck(a_buf.size() <= b_buf.size());
 			for (T* a = a_buf.start, *b = b_buf.start; a != a_buf.finish; ++a, ++b)
@@ -220,7 +250,7 @@ namespace utils
 		}
 
 		template <typename Op>
-		constexpr static void buffer_copy_op(InitialisedBuffer from, Buffer to, const Op& copy_op)
+		CONSTEXPR static void buffer_copy_op(InitialisedBuffer from, Buffer to, const Op& copy_op)
 		{
 			AdventCheck(from.size() <= to.size());
 			if constexpr (std::is_trivially_copyable_v<T>)
@@ -233,17 +263,21 @@ namespace utils
 			}
 		}
 
-		constexpr static void copy_buffer_to_raw_memory(InitialisedBuffer from, RawMemory to)
+		CONSTEXPR static void copy_buffer_to_raw_memory(InitialisedBuffer from, RawMemory to)
 		{
-			buffer_copy_op(from, to, [](T* f, T* t) { new(t) T(*f); });
+			buffer_copy_op(from, to, [](T* f, T* t)
+				{
+					check_memory_dead(t);
+					new(t) T(*f); 
+				});
 		}
 
-		constexpr static void copy_buffer_to_initialised_memory(InitialisedBuffer from, InitialisedBuffer to)
+		CONSTEXPR static void copy_buffer_to_initialised_memory(InitialisedBuffer from, InitialisedBuffer to)
 		{
 			buffer_copy_op(from, to, [](T* f, T* t) { *t = *f; });
 		}
 
-		constexpr static void delete_data_in_buffer(InitialisedBuffer buf)
+		CONSTEXPR static void delete_data_in_buffer(InitialisedBuffer buf)
 		{
 			if constexpr (!std::is_trivially_destructible_v<T>)
 			{
@@ -252,9 +286,10 @@ namespace utils
 					it->~T();
 				}
 			}
+			debug_mark_memory_dead(buf.begin(), buf.end());
 		}
 
-		constexpr static void move_buffer_to_raw_memory(InitialisedBuffer from, RawMemory to)
+		CONSTEXPR static void move_buffer_to_raw_memory(InitialisedBuffer from, RawMemory to)
 		{
 			AdventCheck(from.size() <= to.size());
 			if constexpr (!can_use_move_internally())
@@ -263,11 +298,15 @@ namespace utils
 			}
 			else
 			{
-				buffer_pair_operation(from, to, [](T* from_it, T* to_it) {new(to_it) T(std::move(*from_it)); });
+				buffer_pair_operation(from, to, [](T* from_it, T* to_it)
+					{
+						check_memory_dead(to_it);
+						new(to_it) T(std::move(*from_it));
+					});
 			}
 		}
 
-		constexpr static void move_buffer_to_initialised_memory(InitialisedBuffer from, InitialisedBuffer to)
+		CONSTEXPR static void move_buffer_to_initialised_memory(InitialisedBuffer from, InitialisedBuffer to)
 		{
 			AdventCheck(from.size() <= to.size());
 			if constexpr (!can_use_move_internally())
@@ -284,8 +323,8 @@ namespace utils
 		{
 			InitialisedBuffer initialised_memory;
 			RawMemory uninitialised_memory;
-			constexpr std::size_t size() const noexcept { return initialised_memory.size() + uninitialised_memory.size(); }
-			constexpr Buffer get_unified_buffer() const noexcept
+			CONSTEXPR std::size_t size() const noexcept { return initialised_memory.size() + uninitialised_memory.size(); }
+			CONSTEXPR Buffer get_unified_buffer() const noexcept
 			{
 				if (uninitialised_memory.empty())
 				{
@@ -300,7 +339,7 @@ namespace utils
 			}
 		};
 
-		constexpr static void move_buffer_to_memory(InitialisedBuffer from, const GapDescription to)
+		CONSTEXPR static void move_buffer_to_memory(InitialisedBuffer from, const GapDescription to)
 		{
 			if (from.empty())
 			{
@@ -338,7 +377,7 @@ namespace utils
 			}
 		}
 
-		constexpr static void copy_buffer_to_memory(InitialisedBuffer from, const GapDescription to)
+		CONSTEXPR static void copy_buffer_to_memory(InitialisedBuffer from, const GapDescription to)
 		{
 			if (from.empty())
 			{
@@ -382,7 +421,7 @@ namespace utils
 			AdventCheck(it <= cend());
 		}
 
-		constexpr GapDescription make_gap_for_insert(const_iterator pos, size_type gap_size)
+		CONSTEXPR GapDescription make_gap_for_insert(const_iterator pos, size_type gap_size)
 		{
 			AdventCheck(size() > 0);
 			check_iterator(pos);
@@ -436,7 +475,7 @@ namespace utils
 			return std::is_trivially_constructible_v<T> && (sizeof(T) == 1);
 		}
 
-		constexpr void memset_buffer(Buffer memory, const T& value)
+		CONSTEXPR void memset_buffer(Buffer memory, const T& value)
 		{
 			static_assert(can_fill_with_memset());
 			if constexpr (std::is_integral_v<T>)
@@ -450,7 +489,7 @@ namespace utils
 		}
 
 		template <typename Op>
-		constexpr void fill_memory_with_op(Buffer memory, const T& value, const Op& op)
+		CONSTEXPR void fill_memory_with_op(Buffer memory, const T& value, const Op& op)
 		{
 			if constexpr (can_fill_with_memset())
 			{
@@ -462,17 +501,21 @@ namespace utils
 			}
 		}
 
-		constexpr void fill_initialised_memory(InitialisedBuffer memory, const T& value)
+		CONSTEXPR void fill_initialised_memory(InitialisedBuffer memory, const T& value)
 		{
 			fill_memory_with_op(memory, value, [](T* loc, const T& val) {*loc = val; });
 		}
 
-		constexpr void fill_raw_memory(RawMemory memory, const T& value)
+		CONSTEXPR void fill_raw_memory(RawMemory memory, const T& value)
 		{
-			fill_memory_with_op(memory, value, [&value](T* loc, const T& val) {loc = new (loc) T(value); });
+			fill_memory_with_op(memory, value, [&value](T* loc, const T& val)
+				{
+					check_memory_dead(loc);
+					loc = new (loc) T(value); 
+				});
 		}
 
-		constexpr void fill_memory(GapDescription memory, const T& value)
+		CONSTEXPR void fill_memory(GapDescription memory, const T& value)
 		{
 			if constexpr (can_fill_with_memset())
 			{
@@ -481,25 +524,102 @@ namespace utils
 			fill_initialised_memory(memory.initialised_memory, value);
 			fill_raw_memory(memory.uninitialised_memory, value);
 		}
+
+		CONSTEXPR T* allocate_memory(std::size_t num_items)
+		{
+			log(std::format("Allocating {} bytes for {} items...", sizeof(T) * num_items, num_items));
+			num_items += DEBUG_SAFETY_BUFFER;
+			T* result = get_allocator().allocate(num_items);
+			log(std::format("    Got address {}", static_cast<void*>(result)));
+			debug_mark_memory_dead(result, result + num_items);
+			return result;
+		}
+
+		CONSTEXPR void deallocate_memory(T* location, std::size_t num_items)
+		{
+			log(std::format("Deallocating {} bytes for {} items at address {}", sizeof(T) * num_items, num_items, static_cast<void*>(location)));
+			num_items += DEBUG_SAFETY_BUFFER;
+			check_memory_dead(location, location + num_items);
+			get_allocator().deallocate(location, num_items);
+		}
+
+		void log(const std::string& msg)
+		{
+#if SMALL_VECTOR_DEBUG_INFO_ENABLED
+			const auto type_name = typeid(T).name();
+			const auto stack_size = stack_buffer_size();
+			const auto my_loc = static_cast<void*>(this);
+			const auto heap_loc = [this]()
+				{
+					return using_heap() ? std::format("{}", static_cast<void*>(m_data.heap_data)) : "S";
+				}();
+			std::cout << std::format("\nutils::small_vector<{},{}>[{}][{}]: {}", type_name, stack_size, my_loc, heap_loc, msg);
+#endif
+		}
+
+		static void check_memory_dead(const void* first, const void* last)
+		{
+#if SMALL_VECTOR_DEBUG_INFO_ENABLED
+			const auto f = static_cast<const char*>(first);
+			const auto l = static_cast<const char*>(last);
+			std::span mem_view(f, l);
+			for (auto it = f; it != l; ++it)
+			{
+				const char val = *it;
+				const char ref = static_cast<char>(DEAD_MEM);
+				if (val != ref)
+				{
+					std::cout << std::format("\nByte {} is not 0xAD as expected (Value={:#x})", static_cast<const void*>(it), val);
+				}
+				AdventCheckMsg(val == ref, "Memory checked against reference value of '0xAD' failed");
+			}
+#endif
+		}
+
+		static void check_memory_dead(const T* item)
+		{
+			check_memory_dead(item, item + 1);
+		}
+
+		void validate_memory() const
+		{
+			check_memory_dead(data() + size(), data() + capacity() + DEBUG_SAFETY_BUFFER);
+		}
+
+		static void debug_mark_memory_dead(void* first, void* last)
+		{
+#if SMALL_VECTOR_DEBUG_INFO_ENABLED
+			const std::size_t len = std::distance(static_cast<std::byte*>(first), static_cast<std::byte*>(last));
+			std::memset(first, DEAD_MEM, len);
+#endif
+		}
+
+		static void debug_mark_memory_dead(T* item)
+		{
+			debug_mark_memory_dead(item, item + 1);
+		}
 	};
 }
 
 template <typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(const allocator_type& alloc) noexcept
-	: m_num_elements{ 0 }, m_capacity{ stack_buffer_size() }{}
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(const allocator_type& alloc) noexcept
+	: m_num_elements{ 0 }, m_capacity{ stack_buffer_size() }
+{
+	debug_mark_memory_dead(m_data.stack_buffer.memory, m_data.stack_buffer.memory + sizeof(T) * (m_capacity + DEBUG_SAFETY_BUFFER));
+}
 
 template <typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(size_type count, const allocator_type& alloc)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(size_type count, const allocator_type& alloc)
 	: small_vector(count, T(), alloc) {}
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::size_type utils::small_vector<T, STACK_SIZE, ALLOC>::max_size() const noexcept
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::size_type utils::small_vector<T, STACK_SIZE, ALLOC>::max_size() const noexcept
 {
 	return std::allocator_traits<ALLOC>::max_size(ALLOC());
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(size_type count, const T& init, const allocator_type& alloc)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(size_type count, const T& init, const allocator_type& alloc)
 	: small_vector(alloc)
 {
 	assign(count, init);
@@ -507,46 +627,46 @@ inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(size_ty
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
 template<std::input_iterator InputIt>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(InputIt first, InputIt last, const allocator_type& alloc)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(InputIt first, InputIt last, const allocator_type& alloc)
 	: small_vector(alloc)
 {
 	assign(first, last);
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(const small_vector<T, STACK_SIZE, ALLOC>& other)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(const small_vector<T, STACK_SIZE, ALLOC>& other)
 	: small_vector(other,allocator_type())
 {
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(const small_vector<T, STACK_SIZE, ALLOC>& other, const allocator_type& alloc)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(const small_vector<T, STACK_SIZE, ALLOC>& other, const allocator_type& alloc)
 	: small_vector(other.begin(),other.end(),alloc)
 {
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(small_vector<T, STACK_SIZE, ALLOC>&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(small_vector<T, STACK_SIZE, ALLOC>&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
 	: small_vector(std::forward<small_vector<T,STACK_SIZE,ALLOC>>(other),allocator_type())
 {
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(std::initializer_list<T> init, const allocator_type& alloc)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(std::initializer_list<T> init, const allocator_type& alloc)
 	: small_vector(alloc)
 {
 	assign(init);
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(small_vector<T,STACK_SIZE,ALLOC>&& other, const allocator_type& alloc)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>::small_vector(small_vector<T,STACK_SIZE,ALLOC>&& other, const allocator_type& alloc)
 	: small_vector(alloc)
 {
 	*this = std::forward<small_vector<T, STACK_SIZE, ALLOC>>(other);
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>& utils::small_vector<T, STACK_SIZE, ALLOC>::operator=(const small_vector<T, STACK_SIZE, ALLOC>& other)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>& utils::small_vector<T, STACK_SIZE, ALLOC>::operator=(const small_vector<T, STACK_SIZE, ALLOC>& other)
 {
 	if (&other != this)
 	{
@@ -556,14 +676,14 @@ inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>& utils::small_vector<
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>& utils::small_vector<T, STACK_SIZE, ALLOC>::operator=(std::initializer_list<T> init)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>& utils::small_vector<T, STACK_SIZE, ALLOC>::operator=(std::initializer_list<T> init)
 {
 	assign(init);
 	return *this;
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(std::initializer_list<T> init)
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(std::initializer_list<T> init)
 {
 	auto move_it = [](auto it)
 	{
@@ -575,26 +695,27 @@ inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(std::ini
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
 inline utils::small_vector<T, STACK_SIZE, ALLOC>::~small_vector()
 {
+	log(std::format("Destroying with {} elements", size()));
 	clear();
 	shrink_to_fit();
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::operator[](size_type pos)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::operator[](size_type pos)
 {
 	AdventCheck(pos < size());
 	return data()[pos];
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_reference utils::small_vector<T, STACK_SIZE, ALLOC>::operator[](size_type pos) const
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_reference utils::small_vector<T, STACK_SIZE, ALLOC>::operator[](size_type pos) const
 {
 	AdventCheck(pos < size());
 	return data()[pos];
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::at(size_type pos)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::at(size_type pos)
 {
 	if (pos >= size())
 	{
@@ -604,7 +725,7 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference u
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_reference utils::small_vector<T, STACK_SIZE, ALLOC>::at(size_type pos) const
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_reference utils::small_vector<T, STACK_SIZE, ALLOC>::at(size_type pos) const
 {
 	if (pos >= size())
 	{
@@ -614,26 +735,26 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_refer
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr T* utils::small_vector<T, STACK_SIZE, ALLOC>::data() noexcept
+inline CONSTEXPR T* utils::small_vector<T, STACK_SIZE, ALLOC>::data() noexcept
 {
 	return using_heap() ? m_data.heap_data : get_stack_buffer();
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr const T* utils::small_vector<T, STACK_SIZE, ALLOC>::data() const noexcept
+inline CONSTEXPR const T* utils::small_vector<T, STACK_SIZE, ALLOC>::data() const noexcept
 {
 	return using_heap() ? m_data.heap_data : get_stack_buffer();
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::reserve(size_type new_cap)
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::reserve(size_type new_cap)
 {
 	if (new_cap <= capacity())
 	{
 		return;
 	}
 
-	T* new_data = get_allocator().allocate(new_cap);
+	T* new_data = allocate_memory(new_cap);
 	const InitialisedBuffer old_buffer = get_initialised_memory();
 	const RawMemory new_buffer{ new_data,new_data + new_cap };
 	move_buffer_to_raw_memory(old_buffer,new_buffer);
@@ -641,15 +762,16 @@ inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::reserve(size_ty
 
 	if (using_heap())
 	{
-		get_allocator().deallocate(old_buffer.start, capacity());
+		deallocate_memory(old_buffer.start, capacity());
 	}
 
 	m_data.heap_data = new_data;
 	m_capacity = new_cap;
+	validate_memory();
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::shrink_to_fit()
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::shrink_to_fit()
 {
 	if (size() == capacity()) // Nothing to do.
 	{
@@ -666,19 +788,20 @@ inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::shrink_to_fit()
 	{
 		if (size() <= stack_buffer_size())
 		{
+			debug_mark_memory_dead(get_stack_buffer(), get_stack_buffer() + stack_buffer_size() + DEBUG_SAFETY_BUFFER);
 			return RawMemory{ get_stack_buffer(),get_stack_buffer() + size() };
 		}
-		T* new_start = get_allocator().allocate(size());
+		T* new_start = allocate_memory(size());
 		return RawMemory{ new_start,new_start + size() };
 	}();
 	move_buffer_to_raw_memory(old_buffer, new_buffer);
 	delete_data_in_buffer(old_buffer);
-	get_allocator().deallocate(old_buffer.start,capacity());
+	deallocate_memory(old_buffer.start,capacity());
 	m_capacity = std::max(stack_buffer_size(), size());
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>& utils::small_vector<T, STACK_SIZE, ALLOC>::operator=(small_vector&& other) noexcept(std::is_nothrow_move_assignable_v<T>&& std::is_nothrow_move_constructible_v<T>)
+inline CONSTEXPR utils::small_vector<T, STACK_SIZE, ALLOC>& utils::small_vector<T, STACK_SIZE, ALLOC>::operator=(small_vector&& other) noexcept(std::is_nothrow_move_assignable_v<T>&& std::is_nothrow_move_constructible_v<T>)
 {
 	if (this == &other)
 	{
@@ -723,14 +846,14 @@ inline constexpr utils::small_vector<T, STACK_SIZE, ALLOC>& utils::small_vector<
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::clear() noexcept
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::clear() noexcept
 {
 	delete_data_in_buffer(get_initialised_memory());
 	m_num_elements = 0;
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::insert(const_iterator pos, T&& value)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::insert(const_iterator pos, T&& value)
 {
 	const GapDescription gap = make_gap_for_insert(pos, 1);
 	//AdventCheck(gap.initialized_memory.size() != gap.uninitialised_memory.size());
@@ -740,7 +863,7 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator ut
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::insert(const_iterator pos, size_type count, const T& value)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::insert(const_iterator pos, size_type count, const T& value)
 {
 	const GapDescription gap = make_gap_for_insert(pos, count);
 	fill_memory(gap, value);
@@ -749,7 +872,7 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator ut
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::insert(const_iterator pos, std::initializer_list<T> init)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::insert(const_iterator pos, std::initializer_list<T> init)
 {
 	auto move_it = [](auto it)
 	{
@@ -760,7 +883,7 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator ut
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
 template<typename ...Args>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::emplace(const_iterator pos, Args && ...args)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::emplace(const_iterator pos, Args && ...args)
 {
 	if (pos == cend())
 	{
@@ -772,12 +895,13 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator ut
 	AdventCheck(gap.uninitualised_memory.empty());
 	*gap.initialised_memory.first = T(std::forward<Args>(args)...);
 	++m_num_elements;
+	validate_memory();
 	return gap.initialised_memory.last;
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
 template<std::input_iterator InputIt>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::insert(const_iterator pos, InputIt first, InputIt last)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::insert(const_iterator pos, InputIt first, InputIt last)
 {
 	using ItCategory = typename std::iterator_traits<InputIt>::iterator_category;
 	if constexpr (std::is_convertible_v<ItCategory, std::input_iterator_tag>)
@@ -792,6 +916,7 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator ut
 		}
 		for (T* uninit = gap.uninitialised_memory.start; uninit != gap.uninitialised_memory.finish; ++uninit)
 		{
+			check_memory_dead(uninit);
 			uninit = new(uninit) T(*(it++));
 		}
 		m_num_elements += size_increase;
@@ -807,16 +932,18 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator ut
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
 template<typename ...Args>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::emplace_back(Args && ...args)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::emplace_back(Args && ...args)
 {
 	grow(size() + 1);
+	check_memory_dead(data() + size());
 	new(data() + size()) T(std::forward<Args>(args)...);
 	++m_num_elements;
+	validate_memory();
 	return back();
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::erase(const_iterator first, const_iterator last)
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator utils::small_vector<T, STACK_SIZE, ALLOC>::erase(const_iterator first, const_iterator last)
 {
 	auto to_nc_it = [this](const_iterator it) -> iterator
 	{
@@ -864,14 +991,14 @@ inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::iterator ut
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::pop_back()
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::pop_back()
 {
 	AdventCheck(!empty());
 	erase(cend() - 1);
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::resize(size_type count, const T& value)
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::resize(size_type count, const T& value)
 {
 	if (count == 0)
 	{
@@ -894,22 +1021,35 @@ inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::resize(size_typ
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::swap(small_vector& other) noexcept
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::swap(small_vector& other) noexcept
 {
+	reserve(other.size());
+	other.reserve(size());
 	if (using_heap() && other.using_heap())
 	{
+		log("Swapping heap pointers. (See next line.)");
+		other.log("Swapping heap points. (See previous line)");
 		std::swap(m_data.heap_data, other.m_data.heap_data);
+		std::swap(m_capacity, other.m_capacity);
+		std::swap(m_num_elements, other.m_num_elements);
+		log("Finished swapping heap pointers. (See next line");
+		other.log("Finished swapping heap pointers. (See previous line)");
 	}
 	else
 	{
+		log("Swapping stack data. (See next line.)");
+		other.log("Swapping stack data. (See previous line)");
 		small_vector<T, STACK_SIZE, ALLOC> temp = std::move(other);
-		other = std::move(this);
+		other = std::move(*this);
 		*this = std::move(temp);
+		log("Swapping stack data. (See next line");
+		other.log("Swapping stack data. (See previous line)");
 	}
+	validate_memory();
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(size_type count, const T& value)
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(size_type count, const T& value)
 {
 	grow(count);
 
@@ -930,7 +1070,7 @@ inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(size_typ
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
 template<std::input_iterator InputIt>
-inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(InputIt first, InputIt last)
+inline CONSTEXPR void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(InputIt first, InputIt last)
 {
 	using ItCategory = typename std::iterator_traits<InputIt>::iterator_category;
 
@@ -1004,41 +1144,43 @@ inline constexpr void utils::small_vector<T, STACK_SIZE, ALLOC>::assign(InputIt 
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::front()
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::front()
 {
 	AdventCheck(!empty());
 	return (*this)[0];
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_reference utils::small_vector<T, STACK_SIZE, ALLOC>::front() const
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_reference utils::small_vector<T, STACK_SIZE, ALLOC>::front() const
 {
 	AdventCheck(!empty());
 	return (*this)[0];
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::back()
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::reference utils::small_vector<T, STACK_SIZE, ALLOC>::back()
 {
 	AdventCheck(!empty());
 	return (*this)[size() - 1];
 }
 
 template<typename T, std::size_t STACK_SIZE, typename ALLOC>
-inline constexpr typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_reference utils::small_vector<T, STACK_SIZE, ALLOC>::back() const
+inline CONSTEXPR typename utils::small_vector<T, STACK_SIZE, ALLOC>::const_reference utils::small_vector<T, STACK_SIZE, ALLOC>::back() const
 {
 	AdventCheck(!empty());
 	return (*this)[size() - 1];
 }
 
 template<typename T_L, typename T_R, std::size_t STACK_SIZE_L, std::size_t STACK_SIZE_R, typename ALLOC_L, typename ALLOC_R>
-inline constexpr bool operator==(const utils::small_vector<T_L, STACK_SIZE_L, ALLOC_L>& left, const utils::small_vector<T_R, STACK_SIZE_R, ALLOC_R>& right) noexcept
+inline CONSTEXPR bool operator==(const utils::small_vector<T_L, STACK_SIZE_L, ALLOC_L>& left, const utils::small_vector<T_R, STACK_SIZE_R, ALLOC_R>& right) noexcept
 {
 	return stdr::equal(left, right);;
 }
 
 template<typename T_L, typename T_R, std::size_t STACK_SIZE_L, std::size_t STACK_SIZE_R, typename ALLOC_L, typename ALLOC_R>
-inline constexpr auto operator<=>(const utils::small_vector<T_L, STACK_SIZE_L, ALLOC_L>& left, const utils::small_vector<T_R, STACK_SIZE_R, ALLOC_R>& right) noexcept
+inline CONSTEXPR auto operator<=>(const utils::small_vector<T_L, STACK_SIZE_L, ALLOC_L>& left, const utils::small_vector<T_R, STACK_SIZE_R, ALLOC_R>& right) noexcept
 {
 	return std::lexicographical_compare_three_way(begin(left), end(left), begin(right), end(right));
 }
+
+#undef CONSTEXPR
