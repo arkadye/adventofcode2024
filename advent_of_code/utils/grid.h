@@ -82,6 +82,15 @@ namespace utils
 			return result;
 		}
 
+		// Get all nodes that meet a predicate
+		utils::small_vector<utils::coords, 1> get_all_coordinates(const NodeType& node) const
+		{
+			return get_all_coordinates_by_predicate([&node](const NodeType& other)
+				{
+					return node == other;
+				});
+		}
+
 		// Get a node using a predicate
 		std::optional<utils::coords> get_coordinates_by_predicate(const auto& predicate) const
 		{
