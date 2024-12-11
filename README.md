@@ -172,7 +172,7 @@ Convenient ways to interact with grids. This includes automatically creating the
 
 Helper functions for asking whether a container or range has duplicates.
 
-TODO: Concepts.   
+~~TODO: Concepts.~~   
 TODO: Optimised path for sorted ranges.  
 TODO: Pick optimised path at compile time for ranges that are always sorted.  
 TODO: Overload for custom comparison functions.

@@ -1,11 +1,12 @@
 #pragma once
 
 #include <iterator>
+#include <ranges>
 
 namespace utils
 {
-	template <typename FwdIt>
-	bool has_duplicates(FwdIt start_it, FwdIt end_it)
+	template <std::forward_iterator FwdIt>
+	bool has_duplicates(FwdIt start_it, FwdIt auto end_it)
 	{
 		if (start_it == end_it) return false;
 		const auto next_it = [start_it]()
@@ -25,8 +26,8 @@ namespace utils
 
 	namespace ranges
 	{
-		template <typename Container>
-		bool has_duplicates(const Container& container)
+		template <std::ranges::forward_range ContainerType>
+		bool has_duplicates(const ContainerType& container)
 		{
 			return utils::has_duplicates(std::cbegin(container), std::cend(container));
 		}
