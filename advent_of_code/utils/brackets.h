@@ -1,7 +1,8 @@
 #pragma once
 
+#include "advent/advent_assert.h"
+
 #include <string_view>
-#include "advent/advent_utils.h"
 
 namespace utils
 {

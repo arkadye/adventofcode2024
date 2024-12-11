@@ -125,7 +125,7 @@ Some bitwise operations. Currently only population is implemented (i.e. counting
 
 A very regularly library. Pass in strings and it will find the closing bracket. It can also do a `bracket_aware_find` where it will find a substring within a string, but ignore anything in brackets. Very useful.
 
-TODO: Remove `advent_utils.h` requirement.
+~~TODO: Remove `advent_utils.h` requirement.~~
 
 ### `combine_maps.h`
 
