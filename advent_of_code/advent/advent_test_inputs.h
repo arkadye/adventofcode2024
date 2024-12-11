@@ -249,3 +249,8 @@ R"(012345
 345678
 4.6789
 56789.)";
+
+constexpr const char* DAY_ELEVEN_A = "0 1 10 99 999";
+#define DAY_ELEVEN_A_1 "1 2024 1 0 9 9 2021976"
+
+constexpr const char* DAY_ELEVEN_B = "125 17";
