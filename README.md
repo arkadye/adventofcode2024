@@ -195,7 +195,7 @@ The adaptor will create a range-type function from an existing indexable contain
 
 Integer square roots. Guaranteed not to have any issues with floating point inaccuracy (e.g. returning a `double` that's slightly *below* the actual result and then getting rounded down by integer truncation).
 
-TODO: A version that returns any type of integer you want.
+~~TODO: A version that returns any type of integer you want.~~
 
 ### `istream_block_iterator.h` and `istream_line_iterator.h`
 
@@ -235,6 +235,7 @@ Calls `push_back` on a container after checking that the container doesn't alrea
 For a numeric range, check whether a value is in that range.
 
 TODO: Concepts?
+TODO: Binary search on sorted ranges.
 
 ### `ring_buffer.h`
 

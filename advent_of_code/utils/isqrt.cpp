@@ -36,7 +36,7 @@ namespace
 
 // Return the square root of an integer. If not exact, this is rounded down.
 // Guaranteed to have no floating point inaccuracies.
-uint64_t utils::isqrt(uint64_t input) noexcept
+template <> uint64_t utils::isqrt(uint64_t input) noexcept
 {
 	switch (input)
 	{
@@ -48,7 +48,7 @@ uint64_t utils::isqrt(uint64_t input) noexcept
 	}
 }
 
-int64_t utils::isqrt(int64_t input) noexcept
+template <> int64_t utils::isqrt(int64_t input) noexcept
 {
 	AdventCheck(input >= 0);
 	return static_cast<int64_t>(isqrt(static_cast<uint64_t>(input)));
