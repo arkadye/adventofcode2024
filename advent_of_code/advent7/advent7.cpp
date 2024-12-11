@@ -31,6 +31,7 @@ namespace
 #include "istream_line_iterator.h"
 #include "to_value.h"
 #include "int_range.h"
+#include "count_digits.h"
 
 namespace
 {
@@ -65,18 +66,6 @@ namespace
 	template <AdventDay Day>
 	constexpr auto get_ops_list() {}
 
-	std::size_t count_digits(uint64_t num)
-	{
-		const std::size_t max = std::numeric_limits<uint64_t>::digits10;
-		uint64_t limit = 10;
-		for (auto result : utils::int_range<std::size_t>{1,max})
-		{
-			if (num < limit) return result;
-			limit *= 10;
-		}
-		return max;
-	}
-
 	template <AdventDay Day>
 	bool has_solution_impl(TargetType partial_solution, ValueList::const_reverse_iterator vals_begin, ValueList::const_reverse_iterator vals_end)
 	{
@@ -88,7 +77,7 @@ namespace
 		// Unconcat.
 		if constexpr (Day == AdventDay::two)
 		{
-			const std::size_t digits = count_digits(value);
+			const std::size_t digits = utils::count_digits(value);
 			const TargetType mod_arg = static_cast<TargetType>(std::pow(10, digits));
 			if (partial_solution > mod_arg)
 			{

@@ -112,6 +112,7 @@ set( UTILS_FILES
 	"utils/coords.h"
 	"utils/coords_iterators.h"
 	"utils/coords3d.h"
+	"utils/count_digits.h"
 	"utils/enums.h"
 	"utils/erase_remove_if.h"
 	"utils/grid.h"
