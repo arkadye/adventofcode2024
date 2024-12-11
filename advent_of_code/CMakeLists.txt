@@ -119,7 +119,6 @@ set( UTILS_FILES
 	"utils/index_iterator.h"
 	"utils/index_iterator2.h"
 	"utils/int_range.h"
-	"utils/is_sorted.h"
 	"utils/isqrt.h"
 	"utils/istream_block_iterator.h"
 	"utils/istream_line_iterator.h"
