@@ -187,9 +187,9 @@ A *very* useful header I use in almost every solution. The `int_range` thing all
 
 The adaptor will create a range-type function from an existing indexable container. This is useful for things that are indexable but don't already have a range associated with them.
 
-### `is_sorted.h`
+### ~~`is_sorted.h`~~
 
-I'm not sure what this is doing here, given `std::is_sorted` exists.
+~~I'm not sure what this is doing here, given `std::is_sorted` exists.~~
 
 ### `isqrt.h`
 
