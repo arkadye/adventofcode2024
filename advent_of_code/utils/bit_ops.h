@@ -1,6 +1,6 @@
 #pragma once
 
-#include <type_traits>
+#include <concepts>
 
 #ifdef _WIN32
 #include <intrin.h>
@@ -11,11 +11,9 @@
 
 namespace utils
 {
-	template <typename T>
+	template <std::unsigned_integral T>
 	T population(T input) noexcept
 	{
-		static_assert(std::is_integral_v<T>, "Can only get population of an integer type");
-		static_assert(std::is_unsigned_v<T>, "Can only get population of an unsigned type.");
 #ifdef _WIN32
 		int cpu_info[4];
 		__cpuid(cpu_info, 1);

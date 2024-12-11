@@ -119,7 +119,7 @@ TODO: Use concepts to clean this up.
 
 Some bitwise operations. Currently only population is implemented (i.e. counting the number of `1` bits in an unsigned integer), but if others come in handy - e.g. an easy way to do a bitset - that will go in here too.
 
-TODO: Use concepts to clean this up.
+~~TODO: Use concepts to clean this up.~~
 
 ### `brackets.h`
 
@@ -156,7 +156,7 @@ Should have a lower-case C at the start, this was one of the first things I made
 
 An adaptor for the 2D coords to iterate over a field defined by coordinates. For example: `for(utils::coords c : utils::elem_range{ utils::coords{0,0} , utils::coords{10,10} })` will iterate over all the coordinates in that field. It can also give you row and column range.
 
-### 'enums.h`
+### `enums.h`
 
 Has utilities for turning an enum into an index, and for sorting on an enum value allowing the enum to be used as a key in maps or an ordered container.
 
