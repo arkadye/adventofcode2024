@@ -51,7 +51,7 @@ message("Building...")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include_directories(. "./utils")
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 message ("cxx Flags:" ${CMAKE_CXX_FLAGS})
