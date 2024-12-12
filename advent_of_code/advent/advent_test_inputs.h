@@ -254,3 +254,43 @@ constexpr const char* DAY_ELEVEN_A = "0 1 10 99 999";
 #define DAY_ELEVEN_A_1 "1 2024 1 0 9 9 2021976"
 
 constexpr const char* DAY_ELEVEN_B = "125 17";
+
+constexpr const char* DAY_TWELVE_A =
+R"(AAAA
+BBCD
+BBCC
+EEEC)";
+
+constexpr const char* DAY_TWELVE_B =
+R"(OOOOO
+OXOXO
+OOOOO
+OXOXO
+OOOOO)";
+
+constexpr const char* DAY_TWELVE_C =
+R"(RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE)";
+
+constexpr const char* DAY_TWELVE_D =
+R"(EEEEE
+EXXXX
+EEEEE
+EXXXX
+EEEEE)";
+
+constexpr const char* DAY_TWELVE_E =
+R"(AAAAAA
+AAABBA
+AAABBA
+ABBAAA
+ABBAAA
+AAAAAA)";
