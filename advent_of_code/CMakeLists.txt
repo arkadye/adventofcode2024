@@ -90,6 +90,10 @@ source_group("framework" FILES ${FRAMEWORK_FILES})
 source_group("framework\\src" FILES ${FRAMEWORK_SOURCE_FILES})
 target_sources(${EXENAME} PUBLIC ${FRAMEWORK_FILES} ${FRAMEWORK_SOURCE_FILES})
 
+if( NOT EXISTS "advent/advent_solutions.h" )
+	configure_file("templates/advent_solutions.h.in" "advent/advent_solutions.h")
+endif()
+
 set(TEST_CONFIG_FILES
 	"advent/advent_setup.h"
 	"advent/advent_solutions.h"
