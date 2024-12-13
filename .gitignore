@@ -58,16 +58,22 @@
 # Files marked as backup
 *.bak
 
-# For Advent of Code, don't accidentally upload puzzle data.
-*/advent*.txt
+# For Advent of Code, don't accidentally upload puzzle data ...
+*/advent[0-9].txt
+*/advent[0-9][0-9].txt
 *.vsidx
 *.lock
 *.i
 *.json
 
+# ... or solutions
+advent_of_code/advent/advent_solutions.h
+
 # For CMAKE temporaries
 advent_of_code/CMakeFiles/*
 advent_of_code/.vs/*
 *.cmake
-!*/cmakelists.txt
-*/advent_solutions.h
+
+
+# Command files
+*.command
