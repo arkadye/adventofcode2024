@@ -5,27 +5,31 @@
 #include <sstream>
 #include <iostream>
 
+#define AdventNoOp() do{}while(false)
+
 #ifdef _MSC_VER
 #include "intrin.h"
 #define InternalAdventPlatformSpecificHint(condition) __assume(condition)
 #define InternalAdventPlatformSpecificUnreachable __assume(false)
 #define InternalAdventPlatformSpecificBreak __debugbreak()
 #else
-#define InternalAdventPlatformSpecificHint(condition) do{}while(false)
+#define InternalAdventPlatformSpecificHint(condition) AdventNoOp()
 #define InternalAdventPlatformSpecificUnreachable do{int* x = nullptr; int y = *x; }while(false)
-#define InternalAdventPlatformSpecificBreak do{}while(false)
+#define InternalAdventPlatformSpecificBreak AdventNoOp()
 #endif
-
-#define AdventCheck(test_bool) advent::check_advent_assert(__FILE__,__LINE__,test_bool,#test_bool)
-#define AdventCheckMsg(test_bool,...) advent::check_advent_assert_msg(__FILE__,__LINE__,test_bool,#test_bool,__VA_ARGS__)
-#define AdventUnreachable() advent::check_advent_assert_msg(__FILE__,__LINE__,false,"Entered unreachable location!"); \
-	InternalAdventPlatformSpecificUnreachable
 
 #if NDEBUG
-#define AdventBreak() do{}while(false)
+#define AdventBreak() AdventNoOp()
+#define AdventCBreak() AdventNoOp()
 #else
 #define AdventBreak() InternalAdventPlatformSpecificBreak
+#define AdventCBreak(test_bool) do{if(!(test_bool)) { AdventBreak();}}while(false)
 #endif
+
+#define AdventCheck(test_bool) AdventCBreak(test_bool); advent::check_advent_assert(__FILE__,__LINE__,test_bool,#test_bool)
+#define AdventCheckMsg(test_bool,...) AdventCBreak(test_bool); advent::check_advent_assert_msg(__FILE__,__LINE__,test_bool,#test_bool,__VA_ARGS__)
+#define AdventUnreachable() AdventBreak(); advent::check_advent_assert_msg(__FILE__,__LINE__,false,"Entered unreachable location!"); \
+	InternalAdventPlatformSpecificUnreachable
 
 namespace advent
 {
@@ -89,7 +93,6 @@ namespace advent
 
 				std::cerr << "\nAdventCheck failed: " << what << '\n';
 				test_failed error{ std::move(what) };
-				AdventBreak();
 				throw error;
 			}
 		}
@@ -106,3 +109,5 @@ namespace advent
 		}
 	}
 }
+
+#undef AdventNoOp
