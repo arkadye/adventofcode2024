@@ -294,3 +294,21 @@ AAABBA
 ABBAAA
 ABBAAA
 AAAAAA)";
+
+constexpr const char* DAY_THIRTEEN_A = R"(Button A: X+94, Y+34
+Button B: X+22, Y+67
+Prize: X=8400, Y=5400)";
+
+constexpr const char* DAY_THIRTEEN_B = R"(Button A: X+26, Y+66
+Button B: X+67, Y+21
+Prize: X=12748, Y=12176)";
+
+constexpr const char* DAY_THIRTEEN_C = R"(Button A: X+17, Y+86
+Button B: X+84, Y+37
+Prize: X=7870, Y=6450)";
+
+constexpr const char* DAY_THIRTEEN_D = R"(Button A: X+69, Y+23
+Button B: X+27, Y+71
+Prize: X=18641, Y=10279)";
+
+static const auto DAY_THIRTEEN_E = advent::combine_inputs<2>(DAY_THIRTEEN_A, DAY_THIRTEEN_B, DAY_THIRTEEN_C, DAY_THIRTEEN_D);
