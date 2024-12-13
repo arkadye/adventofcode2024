@@ -46,7 +46,7 @@ namespace utils
 	inline T to_value(std::string_view sv)
 	{
 		sv = trim_string(sv);
-		AdventCheckMsg(is_value(sv),"Could not convert string to value: " , sv);
+		AdventCheckMsg(is_value(sv),"Could not convert string to value: '" , sv, '\'');
 		if (sv.empty())
 		{
 			return T{ 0 };
