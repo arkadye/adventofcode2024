@@ -59,7 +59,7 @@
 *.bak
 
 # For Advent of Code, don't accidentally upload puzzle data.
-*.txt
+*/advent*.txt
 *.vsidx
 *.lock
 *.i
@@ -70,4 +70,4 @@ advent_of_code/CMakeFiles/*
 advent_of_code/.vs/*
 *.cmake
 !*/cmakelists.txt
-advent_of_code/advent/advent_solutions.h
+*/advent_solutions.h
