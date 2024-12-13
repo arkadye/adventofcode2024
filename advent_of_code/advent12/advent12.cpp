@@ -25,7 +25,7 @@ namespace
 #endif
 }
 
-#include "Coords.h"
+#include "coords.h"
 #include "enums.h"
 
 #include <variant>

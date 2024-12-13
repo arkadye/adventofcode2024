@@ -26,7 +26,7 @@ namespace
 }
 
 #include "sorted_vector.h"
-#include "Coords.h"
+#include "coords.h"
 #include "line.h"
 #include "transform_if.h"
 
