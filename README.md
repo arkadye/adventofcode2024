@@ -138,7 +138,7 @@ TODO: Use concepts to clean this up
 Several useful variations on `min` and `max functions here. While the min and max with transform functions are supplanted by `std::ranges`, the `Larger` and `Smaller` structs are very useful and the variadic `max` function is really useful. For some reason the variadic `min` function isn't implemented, so I guess I never actually used that much.
 
 TODO: Use concepts to allow overloads of variadic `min` and `max` taking a functor.  
-TODO: Implement variadic `min`
+~~TODO: Implement variadic `min`~~
 
 ### `conway_simulation.h`
 

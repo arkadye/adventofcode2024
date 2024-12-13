@@ -122,22 +122,24 @@ namespace utils
 		}
 	}
 
-	template <typename...Args>
-	[[nodiscard]] auto min(const Args&... args) noexcept
+	template <typename T, typename...Args>
+	[[nodiscard]] T min(const T& first, const Args&... rest) noexcept
 	{
-		static_assert(sizeof...(Args) >= 2,"utils::min must be called with at least two arguments");
-	}
-
-	template <typename T>
-	[[nodiscard]] T max(const T& FirstArg, const T& SecondArg)
-	{
-		return Larger{}(FirstArg, SecondArg);
+		if constexpr (sizeof...(Args) > 0)
+		{
+			return Smaller<T>{}(first, min(rest...));
+		}
+		return first;
 	}
 
 	template <typename T, typename...Args>
-	[[nodiscard]] T max(const T& FirstArg, const T& SecondArg, const T& ThirdArg, const Args&... RestOfArgs)
+	[[nodiscard]] T max(const T& first, const Args&... rest)
 	{
-		return Larger{}(FirstArg, max(SecondArg, ThirdArg, RestOfArgs...));
+		if constexpr (sizeof...(Args) > 0)
+		{
+			return Larger{}(first, max(rest...));
+		}
+		return first;
 	}
 
 	namespace ranges
