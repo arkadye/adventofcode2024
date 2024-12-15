@@ -127,10 +127,14 @@ namespace utils
 			}
 		}
 		auto manhatten_distance(const basic_coords& other) const noexcept;
-		constexpr basic_coords(T x_, T y_) : x{ x_ }, y{ y_ }{}
-		constexpr explicit basic_coords(T init) : basic_coords{ init,init } {}
-		constexpr basic_coords() : basic_coords{ 0 } {}
+		constexpr basic_coords(T x_, T y_) noexcept : x{ x_ }, y{ y_ }{}
+		constexpr explicit basic_coords(T init) noexcept : basic_coords{ init,init } {}
+		constexpr basic_coords() noexcept : basic_coords{ 0 } {}
+		template <typename OtherT>
+		constexpr explicit basic_coords(const basic_coords<OtherT>& other) noexcept : basic_coords{ T{other.x},T{other.y} } {}
 
+		template <typename OtherT>
+		operator basic_coords<OtherT>() noexcept { return basic_coords<OtherT>{x, y}; }
 		basic_coords& operator=(const basic_coords&) noexcept = default;
 
 		template <typename T2>
@@ -222,8 +226,8 @@ namespace utils
 			return std::array<basic_coords, 4>
 			{
 				*this + up(),
-				*this + down(),
 				*this + right(),
+				*this + down(),
 				*this + left()
 			};
 		}
@@ -253,6 +257,13 @@ namespace utils
 			result.x = utils::to_value<T>(x);
 			result.y = utils::to_value<T>(y);
 			return result;
+		}
+
+		std::string to_string() const
+		{
+			std::ostringstream out;
+			out << *this;
+			return out.str();
 		}
 	};
 
