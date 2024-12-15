@@ -7,7 +7,8 @@
 #include <concepts>
 
 #include "advent/advent_assert.h"
-#include "istream_line_iterator.h"
+#include "istream_block_iterator.h"
+#include "string_line_iterator.h"
 #include "coords.h"
 #include "coords_iterators.h"
 #include "int_range.h"
@@ -144,9 +145,9 @@ namespace utils
 			stream_grid(oss, impl);
 		}
 
-		void build_from_stream(std::istream& iss, const auto& char_to_node_fn)
+		void build_from_string(std::string_view sv, const auto& char_to_node_fn)
 		{
-			for (auto line : utils::istream_line_range{ iss })
+			for (auto line : utils::string_line_range{ sv })
 			{
 				if(m_max_point.x == 0)
 				{
@@ -160,6 +161,13 @@ namespace utils
 #if AOC_GRID_DEBUG
 			std::cout << "Created grid with dimensions [" << m_max_point << '\n';
 #endif
+		}
+
+		void build_from_stream(std::istream& iss, const auto& char_to_node_fn)
+		{
+			utils::istream_block_iterator block_it{ iss };
+			build_from_string(*block_it, char_to_node_fn);
+			++block_it;
 		}
 
 		utils::small_vector<utils::coords,1> get_path(const utils::coords& start, const auto& is_end_fn,
@@ -202,6 +210,14 @@ namespace utils
 		constexpr bool is_heuristic_fn()
 		{
 			return std::is_invocable_r_v<float, FnType, utils::coords, NodeType>;
+		}
+
+		auto build(std::string_view sv, const auto& char_to_node_fn)
+		{
+			using NodeType = decltype(char_to_node_fn(' '));
+			grid<NodeType> result;
+			result.build_from_string(sv, char_to_node_fn);
+			return result;
 		}
 
 		auto build(std::istream& iss, const auto& char_to_node_fn)
