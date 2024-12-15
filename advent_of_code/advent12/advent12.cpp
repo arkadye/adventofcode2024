@@ -25,236 +25,149 @@ namespace
 #endif
 }
 
-#include "coords.h"
+#include "grid.h"
 #include "enums.h"
 
-#include <variant>
-#include <list>
-#include <ranges>
+#include <vector>
 
 namespace
 {
-	using RegionId = char;
 	using Dir = utils::direction;
-
-	struct RegionData
-	{
-		RegionId id = '\0';
-		std::size_t area = 0u;
-		std::size_t perimeter = 0u;
-		void combine(const RegionData& other)
-		{
-			AdventCheck(id == other.id);
-			area += other.area;
-			perimeter += other.perimeter;
-		}
-		std::size_t evaluate() const { return area * perimeter; }
-	};
-
-	class Region
-	{
-		std::variant<RegionData, Region*> m_data_or_pointer_to_parent;
-	public:
-		Region(RegionId id, std::size_t area, std::size_t perimeter) : m_data_or_pointer_to_parent{ RegionData{id,area,perimeter} } {}
-		bool is_root() const { return std::holds_alternative<RegionData>(m_data_or_pointer_to_parent); }
-
-		const RegionData& get_region_data() const
-		{
-			struct Getter
-			{
-				const RegionData& operator()(const RegionData& rd) { return rd; }
-				const RegionData& operator()(Region* region) { AdventCheck(region != nullptr); return region->get_region_data(); }
-			};
-			return std::visit(Getter{}, m_data_or_pointer_to_parent);
-		}
-
-		RegionData& get_region_data()
-		{
-			const Region& const_this = const_cast<const Region&>(*this);
-			const RegionData& const_result = const_this.get_region_data();
-			return const_cast<RegionData&>(const_result);
-		}
-
-		Region& get_top_level()
-		{
-			struct Getter
-			{
-				explicit Getter(Region& r) : self{ r } {}
-				Region& self;
-				Region& operator()(const RegionData& rd) { return self; }
-				Region& operator()(Region* region) { AdventCheck(region != nullptr); return region->get_top_level(); }
-			};
-			return std::visit(Getter{*this}, m_data_or_pointer_to_parent);
-		}
-
-		void set_parent(Region& new_parent)
-		{
-			if (Region** parent_ptr = std::get_if<Region*>(&m_data_or_pointer_to_parent))
-			{
-				Region* parent = *parent_ptr;
-				AdventCheck(parent != nullptr);
-				parent->set_parent(new_parent);
-			}
-			m_data_or_pointer_to_parent = &new_parent;
-		}
-
-		void merge_with(Region& other)
-		{
-			Region& top_region = get_top_level();
-			Region& other_top = other.get_top_level();
-			if (&top_region == &other_top) return; // Already merged.
-			RegionData& my_data = top_region.get_region_data();
-			const RegionData& other_data = other_top.get_region_data();
-			my_data.combine(other_data);
-			other.set_parent(*this);
-		}
-
-		std::size_t evaluate() const
-		{
-			struct Evaluator
-			{
-				std::size_t operator()(Region*) { return 0u; }
-				std::size_t operator()(const RegionData& rd) { return rd.evaluate(); }
-			};
-
-			return std::visit(Evaluator{}, m_data_or_pointer_to_parent);
-		}
-	};
-
-	std::ostream& operator<<(std::ostream& os, const Region& r)
-	{
-		os << r.get_region_data().id << "[0x" << &r.get_region_data() << ']';
-		return os;
-	}
 
 	class Square
 	{
-		Region& region;
-		std::array<bool, 4> fence_sides{ false,false,false,false };
+		using FlagType = uint8_t;
+		char region_id = 0;
+
+		FlagType flags{ 0 };
+
+		static constexpr FlagType get_dir_flag(Dir d) { return FlagType{ 0b1 } << utils::to_idx(d); }
+		static constexpr FlagType get_checked_flag() { return FlagType{ 0b1000'0000 }; }
 	public:
-		explicit Square(Region& r) : region{ r } {}
-		Region& get_region() const { return region; }
-		RegionId get_id() const { return region.get_region_data().id; }
-		template <class Self> auto& area(this Self&& self) { return self.region.get_region_data().area; }
-		template <class Self> auto& perimeter(this Self&& self) { return self.region.get_region_data().perimeter; }
-		template <class Self> auto& fence(this Self&& self, Dir dir) { return self.fence_sides[utils::to_idx(dir)]; }
+		explicit Square(char in) : region_id{ in } { AdventCheck(std::isalpha(in) || in == '.'); }
+		void mark_checked() { flags = flags | get_checked_flag(); }
+		bool is_checked() const { return (flags & get_checked_flag()) != 0; }
+		void set_fence(Dir d) { flags = flags | get_dir_flag(d); }
+		bool has_fence(Dir d) const { return (flags & get_dir_flag(d)) != 0; }
+		char get_id() const { return region_id; }
 	};
 
-	std::ostream& operator<<(std::ostream& os, Square s)
+	using Grid = utils::grid<Square>;
+
+	Grid parse_grid(std::istream& input)
 	{
-		os << s.get_region();
-		return os;
+		return utils::grid_helpers::build(input, [](char c) {return Square{ c }; });
 	}
 
-	// This feels possible in a single-pass.
 	template <AdventDay day>
-	std::size_t solve_generic(std::istream& input)
+	uint64_t get_overall_score(Grid grid)
 	{
-		std::list<Region> all_regions;
-		std::vector<Square> prev_line, current_line;
-		std::size_t x = 0;
-
-		while(!input.eof())
-		{
-			const char c = input.get();
-			if (c == '\n' || c == EOF)
+		auto get_square = [&grid](utils::coords loc)
 			{
-				AdventCheck(prev_line.size() == 0u || prev_line.size() == current_line.size());
-				AdventCheck(!current_line.empty());
-				Square& last_square = current_line.back();
-				log << "\nProcessing ENDL\n    Bumping " << last_square << " perimeter " << last_square.perimeter() << " --> " << (last_square.perimeter() + 1);
-				++last_square.perimeter();
-				last_square.fence(Dir::up) = last_square.fence(Dir::left) = true;
-				x = 0u;
-				std::swap(prev_line, current_line);
-				current_line.clear();
-				continue;
-			}
-
-			log << "\nProcessing ID [" << c << "]: ";
-
-			AdventCheck(std::isalpha(c));
-
-			AdventCheck(prev_line.empty() || (x < prev_line.size()));
-			Square* above = prev_line.empty() ? nullptr : &prev_line[x];
-			Square* left = current_line.empty() ? nullptr : &current_line.back();
-
-			const bool binds_above = above && above->get_id() == c;
-			const bool binds_left = left && left->get_id() == c;
-
-			Region* my_region = nullptr;
-
-			if (!binds_above && !binds_left)
-			{
-				// No boundaries found. Start a new region.
-				my_region = &(all_regions.emplace_back(c, /*area = */ 1, /*perimter = */ 2));
-				log << "No links. Adding new region " << *my_region << " A=1 P=2";
-				if (above)
+				if (!grid.is_on_grid(loc))
 				{
-					log << "\n    Bumping " << *above << " perimiter " << above->perimeter() << " --> " << (above->perimeter() + 1);
-					++(above->perimeter());
+					Square result{ '.' };
+					result.mark_checked();
+					return result;
 				}
-				if (left)
-				{
-					log << "\n    Bumping " << *left << " perimiter " << left->perimeter() << " --> " << (left->perimeter() + 1);
-					++(left->perimeter());
-				}
-				
-			}
+				return grid[loc];
+			};
 
-			if (binds_above != binds_left)
-			{
-				// Bind to one but not the other.
-				Square* bound = binds_above ? above : left;
-				Square* unbound = binds_above ? left : above;
-				log << "Binding to " << *bound;
-				log << "\n    Bumping area " << bound->area() << " --> " << (bound->area() + 1);
-				log << "\n    Bumping perimiter " << bound->perimeter() << " --> " << (bound->perimeter() + 1);
-				my_region = &bound->get_region();
-				AdventCheck(bound->get_id() == c);
-				++bound->area();
-				++bound->perimeter();
-				if (unbound != nullptr)
-				{
-					log << "\n    Bumping " << *unbound << " perimeter " << unbound->perimeter() << " --> " << (unbound->perimeter() + 1);
-					++unbound->perimeter();
-				}
-			}
-
-			if (binds_above && binds_left)
-			{
-				log << "Merging " << *left << " into " << *above;
-				above->get_region().merge_with(left->get_region());
-				log << "    Bumping area " << above->area() << " --> " << (above->area() + 1);
-				++above->area();
-				my_region = &above->get_region();
-			}
-
-			AdventCheck(my_region != nullptr);
-			current_line.emplace_back(*my_region);
-			++x;
-		}
-
-		// Now we're done, add the bottom perimeter.
-		log << "\nProcessing final line";
-		for (Square& bottom : prev_line)
+		uint64_t result = 0;
+		std::vector<utils::coords> regions_to_check{ utils::coords{0,0} };
+		while (!regions_to_check.empty())
 		{
-			log << "\n    " << bottom << " bumping perimeter " << bottom.perimeter() << " --> " << (bottom.perimeter() + 1);
-			++bottom.perimeter();
-		}
+			const utils::coords region_loc = regions_to_check.back();
+			AdventCheck(grid.is_on_grid(region_loc));
+			regions_to_check.pop_back();
 
-		for (const Region& r : all_regions)
-		{
-			if (r.is_root())
+			if (get_square(region_loc).is_checked()) continue;
+
+			const char region_id = get_square(region_loc).get_id();
+
+			std::size_t region_area = 0u;
+			std::size_t region_fences = 0u;
+
+			std::vector<utils::coords> squares_to_check{ region_loc };
+			while (!squares_to_check.empty())
 			{
-				const RegionData& rd = r.get_region_data();
-				log << "\nRegion '" << rd.id << "[0x" << &r << "] P = " << rd.perimeter << " A = " << rd.area << " Score = " << rd.evaluate();
-			}
-		}
+				const utils::coords loc = squares_to_check.back();
+				squares_to_check.pop_back();
+				AdventCheck(grid.is_on_grid(loc));
+				Square& square = grid[loc];
 
-		return stdr::fold_left(all_regions | stdv::transform([](const Region& r) {return r.evaluate(); }), std::size_t{ 0u }, std::plus<std::size_t>{});
+				AdventCheck(square.get_id() == region_id);
+				if (square.is_checked()) continue;
+
+				++region_area;
+				constexpr std::array<Dir, 4> directions{ Dir::up, Dir::right, Dir::down, Dir::left };
+				for (Dir dir : directions)
+				{
+					const utils::coords neighbour_loc = loc + utils::coords::dir(dir);
+					const Square neighbour = get_square(neighbour_loc);
+					if (neighbour.get_id() != square.get_id())
+					{
+						square.set_fence(dir);
+						if constexpr (day == AdventDay::one)
+						{
+							++region_fences;
+						}
+
+						if (!neighbour.is_checked())
+						{
+							regions_to_check.push_back(neighbour_loc);
+						}
+					}
+					else if (!neighbour.is_checked())
+					{
+						squares_to_check.push_back(neighbour_loc);
+					}
+				}
+
+				if constexpr (day == AdventDay::two)
+				{
+					for (std::size_t dir_idx : utils::int_range{ directions.size() })
+					{
+						std::size_t next_idx = (dir_idx + 1) % directions.size();
+						const Dir dir = directions[dir_idx];
+						const Dir next = directions[next_idx];
+						const bool fence1 = square.has_fence(dir);
+						const bool fence2 = square.has_fence(next);
+						if (fence1 && fence2)
+						{
+							++region_fences;
+						}
+						if (!fence1 && !fence2)
+						{
+							const utils::coords diag_loc = loc + utils::coords::dir(dir) + utils::coords::dir(next);
+							const Square diag = get_square(diag_loc);
+							if (diag.get_id() != square.get_id())
+							{
+								// Concave corner
+								++region_fences;
+							}
+						}
+					}
+				}
+
+				square.mark_checked();
+			}
+
+			log << "\nRegion '" << region_id << "' Starting at " << region_loc << " - A=" << region_area << " ; F=" << region_fences;
+			result += (region_area * region_fences);
+		}
+		return result;
+	}
+
+	template <AdventDay day>
+	uint64_t solve_generic(std::istream& input)
+	{
+		Grid g = parse_grid(input);
+		return get_overall_score<day>(std::move(g));
 	}
 }
+
+
 
 ResultType day_twelve_p1_a(std::istream& input)
 {
