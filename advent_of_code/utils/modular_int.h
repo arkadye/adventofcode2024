@@ -1,6 +1,6 @@
 #pragma once
 
-#include <type_traits>
+#include <concepts>
 #include <istream>
 #include <ostream>
 
@@ -15,12 +15,8 @@ namespace utils
 	};
 
 	// Unwind val into range [min,max).
-	template <typename IntTypeA, typename IntTypeB, typename IntTypeC>
-	constexpr inline auto get_unwound(IntTypeA val, IntTypeB min, IntTypeC max)
+	constexpr inline auto get_unwound(std::integral auto val, std::integral auto min, std::integral auto max)
 	{
-		static_assert(std::is_integral_v<IntTypeA>);
-		static_assert(std::is_integral_v<IntTypeB>);
-		static_assert(std::is_integral_v<IntTypeC>);
 		AdventCheck(max > min);
 		if (min <= val && val < max)
 		{
@@ -42,32 +38,29 @@ namespace utils
 		return get_unwound(offset_val, min, max);
 	}
 
-	template <typename IntType = int, modular_undwind_policy UnwindPolicy = modular_undwind_policy::lazy>
+	template <std::integral IntType = int, modular_undwind_policy UnwindPolicy = modular_undwind_policy::lazy>
 	class modular
 	{
 	public:
 		// Constructors
-		template <typename IntTypeA, typename IntTypeB>
-		constexpr modular(IntType init,IntTypeA min_val, IntTypeB max_val) : m_val{init}, m_min_val{min_val}, m_max_val{max_val}
+		constexpr modular(IntType init,std::integral auto min_val, std::integral auto max_val) : m_val{init}, m_min_val{min_val}, m_max_val{max_val}
 		{
 			static_assert(std::is_integral_v<IntType>, "Underling type of modular must be integer type.");
 			AdventCheckMsg(min_val < max_val, "Invalid args for modular type.");
 			maybe_unwind_val();
 		}
 
-		template <typename IntTypeA>
-		constexpr modular(IntType init, IntTypeA max_val) : modular{ init,IntType{0},max_val } {}
+		constexpr modular(IntType init, std::integral auto max_val) : modular{ init,IntType{0},max_val } {}
 
-		template <typename IntTypeA>
-		explicit constexpr modular(IntTypeA max_val) : modular{ 0, max_val } {}
+		explicit constexpr modular(std::integral auto max_val) : modular{ 0, max_val } {}
 
 		constexpr modular(const modular& other) : modular{ other.m_val, other.m_min_val, other.m_max_val } {}
 
-		template <typename IntTypeA>
+		template <std::integral IntTypeA>
 		constexpr modular(modular<IntTypeA> other) : modular{ other.m_val, other.m_min_val, other.m_max_val } {}
 
 		// Assignment
-		template <typename OtherType>
+		template <typename OtherType> requires std::assignable_from<IntType,OtherType>
 		modular& operator=(OtherType other)
 		{
 			m_val = other;
@@ -75,7 +68,7 @@ namespace utils
 		}
 
 		// Convert to other types.
-		template <typename OtherType>
+		template <typename OtherType> requires std::assignable_from<OtherType, IntType>
 		/* implicit */ constexpr operator OtherType() const
 		{
 			const auto result = get_value();
