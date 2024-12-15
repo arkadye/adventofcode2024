@@ -20,7 +20,7 @@
 
 #if NDEBUG
 #define AdventBreak() AdventNoOp()
-#define AdventCBreak() AdventNoOp()
+#define AdventCBreak(test_bool) AdventNoOp()
 #else
 #define AdventBreak() InternalAdventPlatformSpecificBreak
 #define AdventCBreak(test_bool) do{if(!(test_bool)) { AdventBreak();}}while(false)
@@ -109,5 +109,3 @@ namespace advent
 		}
 	}
 }
-
-#undef AdventNoOp
