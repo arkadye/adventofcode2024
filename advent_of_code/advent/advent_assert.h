@@ -109,5 +109,3 @@ namespace advent
 		}
 	}
 }
-
-#undef AdventNoOp
