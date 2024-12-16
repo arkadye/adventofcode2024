@@ -212,6 +212,8 @@ namespace utils
 			BasicBuffer() : BasicBuffer{ nullptr,nullptr } {}
 			CONSTEXPR std::size_t size() const noexcept { return std::distance(start, finish); }
 			CONSTEXPR bool empty() const noexcept { return start == finish; }
+			CONSTEXPR std::size_t bytes() const noexcept { return std::distance(static_cast<char*>(start), static_cast<char*>(finish)); }
+			CONSTEXPR char* raw_data() const noexcept { return static_cast<char*>(start); }
 			U* begin() { return start; }
 			U* end() { return finish; }
 		};
@@ -546,14 +548,16 @@ namespace utils
 		void log(const std::string& msg)
 		{
 #if SMALL_VECTOR_DEBUG_INFO_ENABLED
-			const auto type_name = typeid(T).name();
+			const std::string_view type_name = typeid(T).name();
+			const auto name_split = type_name.rfind("::");
+			const auto short_name = type_name.substr(name_split + 2);
 			const auto stack_size = stack_buffer_size();
 			const auto my_loc = static_cast<void*>(this);
 			const auto heap_loc = [this]()
 				{
 					return using_heap() ? std::format("{}", static_cast<void*>(m_data.heap_data)) : "S";
 				}();
-			std::cout << std::format("\nutils::small_vector<{},{}>[{}][{}]: {}", type_name, stack_size, my_loc, heap_loc, msg);
+			std::cout << std::format("\nutils::small_vector<{},{}>[{}][{}]: {}", short_name, stack_size, my_loc, heap_loc, msg);
 #endif
 		}
 
