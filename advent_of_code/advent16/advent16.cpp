@@ -25,7 +25,7 @@ namespace
 #endif
 }
 
-#define FORCE_SMALL_VECTOR_DEBUG_INFO
+//#define FORCE_SMALL_VECTOR_DEBUG_INFO
 
 #include "a_star.h"
 #include "grid.h"
@@ -115,7 +115,7 @@ namespace
 						}
 						else
 						{
-							std::cout << "\nRejected adding " << s << ": inside or turning at a wall";
+							log << "\nRejected adding " << s << ": inside or turning at a wall";
 						};
 					};
 				add_if_valid(forward_step, forward_step.location);
@@ -191,7 +191,6 @@ namespace
 			{
 #if DAY16DBG
 				log << "\nState: " << state << "Path cost : " << cost << " (H = " << plus_heuristic << ").Processed = " << processed << " Unprocessed = " << to_check;
-				return;
 				const auto path = get_path();
 				log << "\nDirection=" << state.direction;
 				const Location grid_max = grid.get_max_point();
@@ -233,6 +232,7 @@ namespace
 						log << static_cast<char>(grid[loc]);
 					}
 				}
+				//std::cin.get();
 #endif
 			};
 
