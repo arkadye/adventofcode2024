@@ -19,4 +19,17 @@
       </ArrayItems>
     </Expand>
   </Type>
+	<Type Name="utils::sorted_vector&lt;*,*,*&gt;">
+		<Intrinsic Name="data" Expression="m_data" />
+	</Type>
+	<Type Name="utils::small_vector&lt;*,*&gt;::BasicBuffer&lt;*&gt;">
+		<Intrinsic Name="elems" Expression="finish - start"/>
+		<Intrinsic Name="bytes" Expression="static_cast&lt;char&gt;(finish) - static_cast&lt;char&gt;(start)"/>
+		<Expand>
+			<ArrayItems>
+				<Size>bytes()</Size>
+				<ValuePointer>raw_data()</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
 </AutoVisualizer>
