@@ -13,6 +13,9 @@ namespace utils
 	class sorted_vector
 	{
 	public:
+		template <typename OtherT, typename OtherPred, std::size_t OtherBufferSize>
+		friend class sorted_vector;
+
 		using iterator = typename utils::small_vector<T,BufferSize>::iterator;
 		using const_iterator = typename utils::small_vector<T,BufferSize>::const_iterator;
 		using value_type = T;
@@ -58,9 +61,29 @@ namespace utils
 		}
 
 		sorted_vector(const sorted_vector&) = default;
+		template <typename OtherPredicate, std::size_t OtherBufferSize>
+		sorted_vector(const sorted_vector<T, OtherPredicate, OtherBufferSize>& other, BinaryPred pred) : sorted_vector(other.begin(), other.end(), pred) {}
+		template <typename OtherPredicate, std::size_t OtherBufferSize>
+		sorted_vector(const sorted_vector<T, OtherPredicate, OtherBufferSize>& other) : sorted_vector(other,BinaryPred{}) {}
 		sorted_vector(sorted_vector&&) = default;
+		template <typename OtherPredicate>
+		explicit sorted_vector(sorted_vector<T, OtherPredicate, BufferSize>&& other, BinaryPred pred)
+			: m_data{ std::move(other.m_data) }
+			, m_compare{ std::move(pred) }
+			, m_sorted{ m_data.size() < 2u }
+		{}
+		template <typename OtherPredicate>
+		explicit sorted_vector(sorted_vector<T, OtherPredicate, BufferSize>&& other) : sorted_vector(std::forward<decltype(other)>(other) , BinaryPred{}) {}
 		sorted_vector& operator=(const sorted_vector&) = default;
+		template <typename OtherPredicate, std::size_t OtherBufferSize>
+		sorted_vector& operator=(const sorted_vector<T, OtherPredicate, OtherBufferSize>& other) { assign(other.begin(), other.end()); }
 		sorted_vector& operator=(sorted_vector&&) = default;
+		template <typename OtherPredicate>
+		sorted_vector& operator=(sorted_vector<T, OtherPredicate, BufferSize>&& other)
+		{
+			m_data = std::move(other.m_data);
+			m_sorted = m_data.size() < 2u;
+		}
 
 		void reserve(std::size_t new_capacity)
 		{
