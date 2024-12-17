@@ -5,6 +5,8 @@
 #include "advent_headers.h"
 #include "advent_solutions.h"
 
+#include <vector>
+
 static const verification_test tests[] =
 {
 	TESTCASE_WITH_ARG(day_one_p1_a, DAY_ONE_A, 11),
@@ -122,6 +124,8 @@ static const verification_test tests[] =
 	DAY(fifteen, DAY_15_1_SOLUTION, DAY_15_2_SOLUTION),
 	TESTCASE_WITH_ARG(day_sixteen_p1_a, DAY_SIXTEEN_A, 7036),
 	TESTCASE_WITH_ARG(day_sixteen_p1_a, DAY_SIXTEEN_B, 11048),
+	TESTCASE_WITH_ARG(day_sixteen_p2_a, DAY_SIXTEEN_A, 45),
+	TESTCASE_WITH_ARG(day_sixteen_p2_a, DAY_SIXTEEN_B, 62),
 	DAY(sixteen, DAY_16_1_SOLUTION, DAY_16_2_SOLUTION),
 	DAY(seventeen, DAY_17_1_SOLUTION, DAY_17_2_SOLUTION),
 	DAY(eighteen, DAY_18_1_SOLUTION, DAY_18_2_SOLUTION),
