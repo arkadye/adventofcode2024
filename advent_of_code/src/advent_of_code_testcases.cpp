@@ -51,7 +51,7 @@ struct test_result
 	std::string result;
 	std::string expected;
 	test_status status = test_status::unknown;
-	std::chrono::nanoseconds time_taken;
+	std::chrono::nanoseconds time_taken{};
 };
 
 template <test_status status>
@@ -226,7 +226,8 @@ test_result run_test(const verification_test& test, const std::vector<std::strin
 bool verify_all(const std::vector<std::string_view>& filter)
 {
 	constexpr auto NUM_TESTS = std::size(tests);
-	std::array<test_result, NUM_TESTS> results;
+	auto result_ptr = std::make_unique<std::array<test_result, NUM_TESTS>>();
+	auto& results = *result_ptr;
 	std::ranges::transform(tests, begin(results),
 		[&filter](const verification_test& test)
 		{
