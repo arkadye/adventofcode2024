@@ -70,10 +70,9 @@
 advent_of_code/advent/advent_solutions.h
 
 # For CMAKE temporaries
-advent_of_code/CMakeFiles/*
+**/CMakeFiles/*
 advent_of_code/.vs/*
 *.cmake
-
 
 # Command files
 *.command
