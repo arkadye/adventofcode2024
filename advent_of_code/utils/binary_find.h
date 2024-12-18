@@ -1,13 +1,17 @@
 #pragma once
 
+#include "advent/advent_assert.h"
+
 #include <algorithm>
+#include <iterator>
+#include <ranges>
 
 namespace utils
 {
-	template <typename FwdIt, typename T, typename Pred>
+	template <std::forward_iterator FwdIt, typename T, typename Pred>
 	inline FwdIt binary_find(FwdIt start, FwdIt finish, const T& val, const Pred& pred) noexcept
 	{
-		assert(std::is_sorted(start, finish, pred));
+		AdventCheck(std::is_sorted(start, finish, pred));
 		const auto result = std::lower_bound(start, finish, val, pred);
 		if (result == finish)
 		{
@@ -24,7 +28,7 @@ namespace utils
 		return result;
 	}
 
-	template <typename FwdIt, typename T>
+	template <std::forward_iterator FwdIt, typename T>
 	inline FwdIt binary_find(FwdIt start, FwdIt finish, const T& val) noexcept
 	{
 		return binary_find(start, finish, val, std::less<T>{});
@@ -35,7 +39,7 @@ namespace utils
 	// equivalent - return this value
 	// less - this iterator points to a value that is too small
 	// greater - this iterator points to a value that is too large
-	template <typename FwdIt, typename ThreeWayPredicate>
+	template <std::forward_iterator FwdIt, typename ThreeWayPredicate>
 	inline FwdIt binary_find_by_predicate(FwdIt start, FwdIt finish, const ThreeWayPredicate& predicate)
 	{
 		static_assert(std::is_invocable_r_v<std::weak_ordering, ThreeWayPredicate, decltype(*start)>, "predicate must accept FwdIt::value_type as an argument, and return a std::weak_ordering");
@@ -77,7 +81,7 @@ namespace utils
 	}
 
 	// This helper version of find_by_predicate allows a reference value to be passed in.
-	template <typename FwdIt, typename RefType, typename ThreeWayPredicate>
+	template <std::forward_iterator FwdIt, typename RefType, typename ThreeWayPredicate>
 	inline FwdIt binary_find_by_predicate(FwdIt start, FwdIt finish, const RefType& ref, const ThreeWayPredicate& predicate)
 	{
 		using ValueType = decltype(*start);
@@ -91,7 +95,7 @@ namespace utils
 
 	namespace ranges
 	{
-		template <typename RangeType, typename T, typename Pred>
+		template <stdr::range RangeType, typename T, typename Pred>
 		inline auto binary_find(RangeType&& range, const T& val, const Pred& pred) noexcept
 		{
 			return utils::binary_find(begin(range), end(range), val, pred);
@@ -108,14 +112,14 @@ namespace utils
 		// equivalent - return this value
 		// less - this iterator points to a value that is too small
 		// greater - this iterator points to a value that is too large
-		template <typename RangeType, typename ThreeWayPredicate>
+		template <stdr::range RangeType, typename ThreeWayPredicate>
 		inline auto binary_find_by_predicate(RangeType&& range, const ThreeWayPredicate& predicate)
 		{
 			return utils::binary_find_by_predicate(begin(range), end(range), predicate);
 		}
 
 		// This helper version of find_by_predicate allows a reference value to be passed in.
-		template <typename RangeType, typename RefType, typename ThreeWayPredicate>
+		template <stdr::range RangeType, typename RefType, typename ThreeWayPredicate>
 		inline auto binary_find_by_predicate(RangeType&& range, const RefType& ref, const ThreeWayPredicate& predicate)
 		{
 			return utils::binary_find_by_predicate(begin(range), end(range), ref, predicate);
