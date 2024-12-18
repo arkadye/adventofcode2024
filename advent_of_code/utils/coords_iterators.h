@@ -147,6 +147,12 @@ namespace utils::coords_iterators
 		}
 	};
 
+	template <std::integral T>
+	inline elem_range<T> get_range(const basic_coords<T>& start, const basic_coords<T>& finish) noexcept
+	{
+		return elem_range<T>::get_range(start, finish);
+	}
+
 	namespace internal_helpers
 	{
 		template <std::integral T>
