@@ -135,6 +135,8 @@ static const verification_test tests[] =
 	TESTCASE_WITH_ARG(day_seventeen_p1_b,DAY_SEVENTEEN_E, 44354),
 	TESTCASE_WITH_ARG(day_seventeen_p1, DAY_SEVENTEEN_F, "4,6,3,5,6,3,5,2,1,0"),
 	DAY(seventeen, DAY_17_1_SOLUTION, DAY_17_2_SOLUTION),
+	TESTCASE_WITH_ARG(day_eighteen_p1, DAY_EIGHTEEN_A,22),
+	TESTCASE_WITH_ARG(day_eighteen_p2, DAY_EIGHTEEN_A, "6,1"),
 	DAY(eighteen, DAY_18_1_SOLUTION, DAY_18_2_SOLUTION),
 	DAY(nineteen, DAY_19_1_SOLUTION, DAY_19_2_SOLUTION),
 	DAY(twenty, DAY_20_1_SOLUTION, DAY_20_2_SOLUTION),
