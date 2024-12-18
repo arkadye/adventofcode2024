@@ -4,6 +4,7 @@
 #include "binary_find.h"
 #include <algorithm>
 #include <functional>
+#include <ranges>
 
 #include "advent/advent_assert.h"
 
@@ -45,10 +46,10 @@ namespace utils
 		{
 			AdventCheck(m_data.empty());
 		}
-		template <typename InputIt>
+		template <std::input_iterator InputIt>
 		sorted_vector(InputIt start, InputIt finish) : sorted_vector(start, finish, BinaryPred{}) {}
 
-		template <typename InputIt>
+		template <std::input_iterator InputIt>
 		sorted_vector(InputIt start, InputIt finish, BinaryPred compare)
 			: m_data(start, finish)
 			, m_compare(compare)
@@ -60,6 +61,14 @@ namespace utils
 			AdventCheck(m_data.size() == ilist.size());
 		}
 
+		sorted_vector(small_vector <T,BufferSize>&& init, const BinaryPred& compare)
+			: m_data(std::move(init))
+			, m_compare(compare)
+			, m_sorted(m_data.size() < 2u)
+		{}
+
+		explicit sorted_vector(small_vector<T, BufferSize>&& init) : sorted_vector(std::move(init), BinaryPred{}) {}
+
 		sorted_vector(const sorted_vector&) = default;
 		template <typename OtherPredicate, std::size_t OtherBufferSize>
 		sorted_vector(const sorted_vector<T, OtherPredicate, OtherBufferSize>& other, BinaryPred pred) : sorted_vector(other.begin(), other.end(), pred) {}
@@ -67,11 +76,7 @@ namespace utils
 		sorted_vector(const sorted_vector<T, OtherPredicate, OtherBufferSize>& other) : sorted_vector(other,BinaryPred{}) {}
 		sorted_vector(sorted_vector&&) = default;
 		template <typename OtherPredicate>
-		explicit sorted_vector(sorted_vector<T, OtherPredicate, BufferSize>&& other, BinaryPred pred)
-			: m_data{ std::move(other.m_data) }
-			, m_compare{ std::move(pred) }
-			, m_sorted{ m_data.size() < 2u }
-		{}
+		sorted_vector(sorted_vector<T, OtherPredicate, BufferSize>&& other, const BinaryPred& pred) : sorted_vector(std::move(other.m_data), pred) {}
 		template <typename OtherPredicate>
 		explicit sorted_vector(sorted_vector<T, OtherPredicate, BufferSize>&& other) : sorted_vector(std::forward<decltype(other)>(other) , BinaryPred{}) {}
 		sorted_vector& operator=(const sorted_vector&) = default;
@@ -81,8 +86,14 @@ namespace utils
 		template <typename OtherPredicate>
 		sorted_vector& operator=(sorted_vector<T, OtherPredicate, BufferSize>&& other)
 		{
-			m_data = std::move(other.m_data);
+			*this = std::move(other.m_data);
+			return *this;
+		}
+		sorted_vector& operator=(small_vector<T, BufferSize>&& other)
+		{
+			m_data = std::move(other);
 			m_sorted = m_data.size() < 2u;
+			return *this;
 		}
 
 		void reserve(std::size_t new_capacity)
@@ -314,7 +325,7 @@ namespace utils
 			}
 		}
 
-		template <typename InputIterator>
+		template <std::input_iterator InputIterator>
 		void insert(InputIterator first, InputIterator last)
 		{
 			m_data.insert(m_data.end(), first, last);
@@ -500,7 +511,7 @@ namespace utils
 		return sorted_vector<T, BinaryPredicate, BufferSize>(first, last, pred);
 	}
 
-	template <typename T, typename InputIt, typename BinaryPredicate>
+	template <typename T, std::input_iterator InputIt, typename BinaryPredicate>
 	inline auto make_sorted_vector(InputIt first, InputIt last, const BinaryPredicate& pred)
 	{
 		return sorted_vector<T, BinaryPredicate>(first, last, pred);
