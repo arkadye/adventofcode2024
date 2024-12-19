@@ -48,6 +48,7 @@ endif()
 
 message("Building...")
 
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include_directories(. "./utils")
 
