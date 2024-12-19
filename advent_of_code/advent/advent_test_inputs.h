@@ -7,13 +7,13 @@ namespace advent
 {
 	namespace combine_inputs_internal
 	{
-		inline std::string impl(std::string_view joiner, std::ostringstream& collector)
+		[[nodiscard]] inline std::string impl(std::string_view joiner, std::ostringstream& collector)
 		{
 			return collector.str();
 		}
 
 		template <typename...StringViews>
-		inline std::string impl(std::string_view joiner, std::ostringstream& collector, std::string_view next_string, StringViews...remaining)
+		[[nodiscard]] inline std::string impl(std::string_view joiner, std::ostringstream& collector, std::string_view next_string, StringViews...remaining)
 		{
 			collector << joiner << next_string;
 			return impl(joiner, collector,remaining...);
@@ -21,7 +21,7 @@ namespace advent
 	}
 
 	template <std::size_t NUM_NEWLINES, typename...StringViews>
-	inline std::string combine_inputs(std::string_view first_string, StringViews...remaining)
+	[[nodiscard]] inline std::string combine_inputs(std::string_view first_string, StringViews...remaining)
 	{
 		std::ostringstream collector;
 		std::string joiner(NUM_NEWLINES, '\n');
@@ -46,7 +46,7 @@ will set TEXT_ONE to "test1_input\n\ntest2"
 
 */
 
-constexpr const char* DAY_ONE_A = 
+constexpr const char* DAY_ONE_A =
 R"(3   4
 4   3
 2   5
@@ -452,3 +452,39 @@ R"(5,4
 0,5
 1,6
 2,0)";
+
+constexpr const char* DAY_NINETEEN_HEADER = "r, wr, b, g, bwu, rb, gb, br";
+
+template <typename...Lines>
+inline std::string day_19_make_testcase(std::string_view header, Lines...lines)
+{
+	const std::string body = advent::combine_inputs<1>(lines...);
+	return advent::combine_inputs<2>(header, body);
+}
+
+constexpr const char* DAY_NINETEEN_LINE_A = "brwrr";
+constexpr const char* DAY_NINETEEN_LINE_B = "bggr";
+constexpr const char* DAY_NINETEEN_LINE_C = "gbbr";
+constexpr const char* DAY_NINETEEN_LINE_D = "rrbgbr";
+constexpr const char* DAY_NINETEEN_LINE_E = "ubwu";
+constexpr const char* DAY_NINETEEN_LINE_F = "bwurrg";
+constexpr const char* DAY_NINETEEN_LINE_G = "brgr";
+constexpr const char* DAY_NINETEEN_LINE_H = "bbrgwb";
+
+static const auto DAY_NINETEEN_A = day_19_make_testcase(DAY_NINETEEN_HEADER, DAY_NINETEEN_LINE_A);
+static const auto DAY_NINETEEN_B = day_19_make_testcase(DAY_NINETEEN_HEADER, DAY_NINETEEN_LINE_B);
+static const auto DAY_NINETEEN_C = day_19_make_testcase(DAY_NINETEEN_HEADER, DAY_NINETEEN_LINE_C);
+static const auto DAY_NINETEEN_D = day_19_make_testcase(DAY_NINETEEN_HEADER, DAY_NINETEEN_LINE_D);
+static const auto DAY_NINETEEN_E = day_19_make_testcase(DAY_NINETEEN_HEADER, DAY_NINETEEN_LINE_E);
+static const auto DAY_NINETEEN_F = day_19_make_testcase(DAY_NINETEEN_HEADER, DAY_NINETEEN_LINE_F);
+static const auto DAY_NINETEEN_G = day_19_make_testcase(DAY_NINETEEN_HEADER, DAY_NINETEEN_LINE_G);
+static const auto DAY_NINETEEN_H = day_19_make_testcase(DAY_NINETEEN_HEADER, DAY_NINETEEN_LINE_H);
+static const auto DAY_NINETEEN_I = day_19_make_testcase(DAY_NINETEEN_HEADER,
+	DAY_NINETEEN_LINE_A,
+	DAY_NINETEEN_LINE_B,
+	DAY_NINETEEN_LINE_C,
+	DAY_NINETEEN_LINE_D,
+	DAY_NINETEEN_LINE_E,
+	DAY_NINETEEN_LINE_F,
+	DAY_NINETEEN_LINE_G,
+	DAY_NINETEEN_LINE_H);
