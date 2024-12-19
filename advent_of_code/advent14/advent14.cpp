@@ -184,7 +184,7 @@ namespace
 		x += offset.x;
 		y += offset.y;
 		const Coords result{ static_cast<CoordType>(x.get_value()), static_cast<CoordType>(y.get_value()) };
-		log << "\nMoved robot " << steps << " steps from " << robot.location << " with v=" << robot.velocity << " to location " << result;
+//		log << "\nMoved robot " << steps << " steps from " << robot.location << " with v=" << robot.velocity << " to location " << result;
 		return result;
 	}
 
@@ -234,7 +234,7 @@ namespace
 
 namespace
 {
-	void print_grid(std::ostream& output, std::vector<Robot> robots, Coords grid_size)
+	void print_grid(auto& output_stream, std::vector<Robot> robots, Coords grid_size)
 	{
 		bool first = true;
 		stdr::sort(robots, [](const Robot& l, const Robot& r) { return l.location < r.location; });
@@ -243,7 +243,7 @@ namespace
 		{
 			if (!first)
 			{
-				output << '\n';
+				output_stream << '\n';
 			}
 			first = false;
 
@@ -251,34 +251,84 @@ namespace
 			{
 				const Coords loc{ x,y };
 				const bool has_robot = stdr::binary_search(robots, loc, {}, [](Robot r) {return r.location; });
-				output << (has_robot ? '#' : ' ');
+				output_stream << (has_robot ? '#' : ' ');
 			}
 		}
 	}
 
+	struct LayoutAnalysis
+	{
+		std::size_t step = 0u;
+		double average_location = 0.0;
+		double location_deviation = 0.0;
+	};
+
+	double average(stdr::range auto&& input)
+	{
+		const double total = stdr::fold_left(input, 0.0, std::plus<double>{});
+		const double result = static_cast<double>(total) / std::size(input);
+		return result;
+	}
+
+	double variance(stdr::range auto&& input, double avg)
+	{
+		auto variance = [avg](double val)
+			{
+				const double diff = val - avg;
+				return diff * diff;
+			};
+		return average(input | stdv::transform(variance));
+	}
+
+	LayoutAnalysis make_layout_analysis(std::size_t step, stdr::range auto&& data)
+	{
+		LayoutAnalysis result;
+		result.step = step;
+		result.average_location = average(data);
+		result.location_deviation = variance(data, result.average_location);
+		return result;
+	}
+
 	int64_t solve_p2(std::istream& input)
 	{
-		return 0;
+		//return 0;
 		using ILI = utils::istream_line_iterator;
 
 		const Coords grid_size{ 101,103 };
-		std::vector<Robot> robots;
-		std::transform(ILI{ input }, ILI{}, std::back_inserter(robots), [grid_size](std::string_view line) {return parse_robot(line, grid_size); });
-
-		int counter = 0;
-		while (counter < (grid_size.x * grid_size.y))
-		{
-			std::ostringstream grid;
-			print_grid(grid, robots, grid_size);
-			log << "\nSeconds=" << counter << ":\n" << grid.str() << '\n';
-
-			for (Robot& r : robots)
+		const std::vector<Robot> robots = [grid_size, &input]()
 			{
-				r.location = advance_robot(r, grid_size, 1);
+				auto func = [grid_size](std::string_view line) {return parse_robot(line, grid_size); };
+				std::vector<Robot> result;
+				stdr::transform(utils::istream_line_range{ input }, std::back_inserter(result), func);
+				return result;
+			}();
+
+		std::vector<LayoutAnalysis> x_analysis, y_analysis;
+		x_analysis.reserve(grid_size.x);
+		y_analysis.reserve(grid_size.y);
+
+		std::vector<Coords> positions;
+		positions.reserve(robots.size());
+
+		for (auto step : utils::int_range<std::size_t>{ static_cast<std::size_t>(std::max(grid_size.x,grid_size.y)) })
+		{
+			stdr::transform(robots, std::back_inserter(positions), [grid_size, step](Robot r) { return advance_robot(r, grid_size, step); });
+
+			if (step < grid_size.x)
+			{
+				LayoutAnalysis data = make_layout_analysis(step, positions | stdv::transform([](Coords loc) {return loc.x; }));
+				x_analysis.push_back(data);
 			}
-			++counter;
+
+			if (step < grid_size.y)
+			{
+				LayoutAnalysis data = make_layout_analysis(step, positions | stdv::transform([](Coords loc) {return loc.y; }));
+				y_analysis.push_back(data);
+			}
+
+			positions.clear();
 		}
-		return counter;
+		return 0;
 	}
 }
 
