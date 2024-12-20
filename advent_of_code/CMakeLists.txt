@@ -83,6 +83,7 @@ set( FRAMEWORK_FILES
 	"advent/advent_testcase_setup.h"
 	"advent/advent_types.h"
 	"advent/advent_utils.h"
+	"advent/consteval_string.h"
 )
 
 set( FRAMEWORK_SOURCE_FILES "src/advent_of_code_testcases.cpp" )
