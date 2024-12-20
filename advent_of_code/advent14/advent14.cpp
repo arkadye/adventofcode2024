@@ -234,10 +234,12 @@ namespace
 
 namespace
 {
-	void print_grid(auto& output_stream, std::vector<Robot> robots, Coords grid_size)
+	void print_grid(auto& output_stream, std::vector<Robot> robots, Coords grid_size, int time_step)
 	{
+		stdr::for_each(robots, [grid_size, time_step](Robot& r) { r.location = advance_robot(r, grid_size, time_step); });
+
 		bool first = true;
-		stdr::sort(robots, [](const Robot& l, const Robot& r) { return l.location < r.location; });
+		stdr::sort(robots, {}, &Robot::location);
 
 		for (CoordType y : utils::int_range{ grid_size.y })
 		{
@@ -250,7 +252,7 @@ namespace
 			for (CoordType x : utils::int_range{ grid_size.x })
 			{
 				const Coords loc{ x,y };
-				const bool has_robot = stdr::binary_search(robots, loc, {}, [](Robot r) {return r.location; });
+				const bool has_robot = stdr::binary_search(robots, loc, {}, &Robot::location);
 				output_stream << (has_robot ? '#' : ' ');
 			}
 		}
@@ -258,7 +260,7 @@ namespace
 
 	struct LayoutAnalysis
 	{
-		std::size_t step = 0u;
+		int step = 0u;
 		double average_location = 0.0;
 		double location_deviation = 0.0;
 	};
@@ -280,13 +282,40 @@ namespace
 		return average(input | stdv::transform(variance));
 	}
 
-	LayoutAnalysis make_layout_analysis(std::size_t step, stdr::range auto&& data)
+	std::vector<LayoutAnalysis>::const_iterator get_var_outlier(const std::vector<LayoutAnalysis>& input)
+	{
+		const double avg = average(input | stdv::transform(&LayoutAnalysis::location_deviation));
+		return stdr::max_element(input, {}, [avg](const LayoutAnalysis& layout) {return std::abs(layout.location_deviation - avg); });
+	}
+
+	LayoutAnalysis make_layout_analysis(int step, stdr::range auto&& data)
 	{
 		LayoutAnalysis result;
 		result.step = step;
 		result.average_location = average(data);
 		result.location_deviation = variance(data, result.average_location);
 		return result;
+	}
+
+	int get_matching_outlier(int x_outlier, int y_outlier, int x_max, int y_max)
+	{
+		if (x_max > y_max) return get_matching_outlier(y_outlier, x_outlier, y_max, x_max);
+
+		// x max and y max must be co-prime for this to work
+		AdventCheck(std::gcd(x_max, y_max) == 1);
+
+		for (int x_loops : utils::int_range{ x_max })
+		{
+			const int steps = x_max * x_loops + x_outlier;
+			if ((steps % y_max) == y_outlier) return steps;
+		}
+		AdventUnreachable();
+		return 0;
+	}
+
+	int get_matching_outlier(int x_outlier, int y_outlier, const Coords& grid_max)
+	{
+		return get_matching_outlier(x_outlier, y_outlier, grid_max.x, grid_max.y);
 	}
 
 	int64_t solve_p2(std::istream& input)
@@ -310,25 +339,31 @@ namespace
 		std::vector<Coords> positions;
 		positions.reserve(robots.size());
 
-		for (auto step : utils::int_range<std::size_t>{ static_cast<std::size_t>(std::max(grid_size.x,grid_size.y)) })
+		for (auto step : utils::int_range{ std::max(grid_size.x,grid_size.y) })
 		{
 			stdr::transform(robots, std::back_inserter(positions), [grid_size, step](Robot r) { return advance_robot(r, grid_size, step); });
 
 			if (step < grid_size.x)
 			{
-				LayoutAnalysis data = make_layout_analysis(step, positions | stdv::transform([](Coords loc) {return loc.x; }));
+				LayoutAnalysis data = make_layout_analysis(step, positions | stdv::transform(&Coords::x));
 				x_analysis.push_back(data);
 			}
 
 			if (step < grid_size.y)
 			{
-				LayoutAnalysis data = make_layout_analysis(step, positions | stdv::transform([](Coords loc) {return loc.y; }));
+				LayoutAnalysis data = make_layout_analysis(step, positions | stdv::transform(&Coords::y));
 				y_analysis.push_back(data);
 			}
 
 			positions.clear();
 		}
-		return 0;
+
+		const auto x_outlier = get_var_outlier(x_analysis);
+		const auto y_outlier = get_var_outlier(y_analysis);
+
+		const int result = get_matching_outlier(x_outlier->step, y_outlier->step, grid_size);
+		print_grid(log, robots, grid_size, result);
+		return result;
 	}
 }
 
