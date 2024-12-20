@@ -121,6 +121,8 @@ static const verification_test tests[] =
 	DAY(fourteen, DAY_14_1_SOLUTION, DAY_14_2_SOLUTION),
 	TESTCASE_WITH_ARG(day_fifteen_p1_a, DAY_FIFTEEN_A, 2028),
 	TESTCASE_WITH_ARG(day_fifteen_p1_a, DAY_FIFTEEN_B, 10092),
+	TESTCASE_WITH_ARG(day_fifteen_p2_a, DAY_FIFTEEN_C, 622),
+	TESTCASE_WITH_ARG(day_fifteen_p2_a, DAY_FIFTEEN_B, 9021),
 	DAY(fifteen, DAY_15_1_SOLUTION, DAY_15_2_SOLUTION),
 	TESTCASE_WITH_ARG(day_sixteen_p1_a, DAY_SIXTEEN_A, 7036),
 	TESTCASE_WITH_ARG(day_sixteen_p1_a, DAY_SIXTEEN_B, 11048),

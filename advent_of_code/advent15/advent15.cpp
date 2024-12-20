@@ -34,24 +34,32 @@ namespace
 	class Tile
 	{
 		static constexpr uint8_t IS_WALL = 1 << 0;
-		static constexpr uint8_t IS_BOX = 1 << 1;
+		static constexpr uint8_t IS_SMALL_BOX = 1 << 1;
 		static constexpr uint8_t IS_MOVEABLE = 1 << 2;
 		static constexpr uint8_t IS_ROBOT = 1 << 3;
+		static constexpr uint8_t IS_LEFT_BOX = 1 << 4;
+		static constexpr uint8_t IS_RIGHT_BOX = 1 << 5;
 		uint8_t flags;
 		explicit Tile(uint8_t initial_flags) : flags{ initial_flags } {}
 	public:
 		static Tile make_empty() { return Tile{ IS_MOVEABLE }; }
 		static Tile make_wall() { return Tile{ IS_WALL }; }
-		static Tile make_box() { return Tile{ IS_BOX | IS_MOVEABLE }; }
+		static Tile make_small_box() { return Tile{ IS_SMALL_BOX | IS_MOVEABLE }; }
+		static Tile make_left_box() { return Tile{ IS_LEFT_BOX | IS_MOVEABLE }; }
+		static Tile make_right_box() { return Tile{ IS_RIGHT_BOX | IS_MOVEABLE }; }
 		static Tile make_robot() { return Tile{ IS_ROBOT }; }
 
 		bool is_moveable() const { return flags & IS_MOVEABLE; }
 		bool is_locked() const { return !is_moveable(); }
 		void lock() { flags = flags & ~IS_MOVEABLE; }
-		bool is_empty() const { return ((IS_BOX | IS_WALL) & flags) == 0u; }
+		bool is_empty() const { return ((IS_SMALL_BOX | IS_WALL) & flags) == 0u; }
 		bool is_wall() const { return flags & IS_WALL; }
-		bool is_box() const { return flags & IS_BOX; }
+		bool is_small_box() const { return flags & IS_SMALL_BOX; }
 		bool is_robot() const { return flags & IS_ROBOT; }
+		bool is_left_box() const { return flags & IS_LEFT_BOX; }
+		bool is_right_box() const { return flags & IS_RIGHT_BOX; }
+		bool is_any_box() const { return flags & (IS_LEFT_BOX | IS_RIGHT_BOX | IS_SMALL_BOX); }
+		bool is_gps_box() const { return flags & (IS_LEFT_BOX | IS_SMALL_BOX); }
 	};
 
 	using Grid = utils::grid<Tile>; 
@@ -63,7 +71,11 @@ namespace
 		case '#':
 			return Tile::make_wall();
 		case 'O':
-			return Tile::make_box();
+			return Tile::make_small_box();
+		case '[':
+			return Tile::make_left_box();
+		case ']':
+			return Tile::make_right_box();
 		case '@':
 			return Tile::make_robot();
 		case '.':
@@ -77,16 +89,57 @@ namespace
 
 	char tile_to_char(Tile t)
 	{
-		if (t.is_box()) return (t.is_moveable() ? 'o' : 'O');
+		if (t.is_small_box()) return (t.is_moveable() ? 'o' : 'O');
+		if (t.is_left_box()) return (t.is_moveable() ? '[' : '{');
+		if (t.is_right_box()) return (t.is_moveable() ? ']' : '}');
 		if (t.is_wall()) return '#';
 		if (t.is_robot()) return '@';
 		if (t.is_empty()) return ' ';
+
 		return 'X';
 	}
 
-	Grid parse_grid(std::istream& in)
+	template <AdventDay day>
+	Grid parse_grid(std::istream& in);
+
+	template <>
+	Grid parse_grid<AdventDay::one>(std::istream& in)
 	{
 		return utils::grid_helpers::build(in, char_to_tile);
+	}
+
+	template <>
+	Grid parse_grid<AdventDay::two>(std::istream& in)
+	{
+		utils::istream_block_iterator block{ in };
+		std::string input_block{ *block };
+		std::ostringstream output_stream;
+		for (char c : input_block)
+		{
+			switch (c)
+			{
+			case '#':
+				output_stream << "##";
+				break;
+			case 'O':
+				output_stream << "[]";
+				break;
+			case '.':
+				output_stream << "..";
+				break;
+			case '@':
+				output_stream << "@.";
+				break;
+			case '\n':
+				output_stream << '\n';
+				break;
+			default:
+				AdventUnreachable();
+				break;
+			}
+		}
+
+		return utils::grid_helpers::build(output_stream.str(), char_to_tile);
 	}
 
 	void print_grid(const Grid& g)
@@ -162,7 +215,7 @@ namespace
 	void lock_box(Grid& grid, const Location& loc)
 	{
 		AdventCheck(grid.is_on_grid(loc));
-		AdventCheck(grid[loc].is_box());
+		AdventCheck(grid[loc].is_any_box());
 		AdventCheck(grid[loc].is_moveable());
 
 		grid[loc].lock();
@@ -176,7 +229,7 @@ namespace
 	bool try_lock_box(Grid& grid, const Location& loc)
 	{
 		if (!grid.is_on_grid(loc)) return false;
-		if (!grid[loc].is_box()) return false;
+		if (!grid[loc].is_any_box()) return false;
 		if (grid[loc].is_locked()) return false;
 
 		const auto neighbours = loc.neighbours();
@@ -201,10 +254,11 @@ namespace
 		return false;
 	}
 
+	template <AdventDay day>
 	State parse_state(std::istream& input)
 	{
 		State result;
-		result.grid = parse_grid(input);
+		result.grid = parse_grid<day>(input);
 		
 
 		// Lock all boxes in corners
@@ -212,7 +266,7 @@ namespace
 			utils::small_vector<Location, 1> candidate_boxes;
 			do
 			{
-				candidate_boxes = result.grid.get_all_coordinates_by_predicate([](Tile t) {return t.is_box() && t.is_moveable(); });
+				candidate_boxes = result.grid.get_all_coordinates_by_predicate([](Tile t) {return t.is_any_box() && t.is_moveable(); });
 			} while (stdr::any_of(candidate_boxes, [&g = result.grid](const Location& l) {return try_lock_box(g, l); }));
 		}
 
@@ -227,58 +281,93 @@ namespace
 		return result;
 	}
 
+	bool can_push(const Grid& grid, const Location& from_location, Dir direction)
+	{
+		const Location target = from_location + Location::dir(direction);
+		const Tile t = grid[target];
+		if (t.is_locked()) return false;
+		if (t.is_empty()) return true;
+		AdventCheck(t.is_any_box());
+
+		if (utils::is_horizontal(direction) || t.is_small_box())
+		{
+			return can_push(grid, target, direction);
+		}
+
+		AdventCheck(utils::is_vertical(direction));
+		const bool direct = can_push(grid, target, direction);
+		if (!direct) return false;
+
+		const Location offset_target = [&target, t]()
+			{;
+				if (t.is_left_box())
+				{
+					return target + Location::dir(utils::direction::right);
+				}
+				else if (t.is_right_box())
+				{
+					return target + Location::dir(utils::direction::left);
+				}
+				AdventUnreachable();
+				return target;
+			}();
+
+		return can_push(grid, offset_target, direction);
+	}
+
+	void execute_push(Grid& grid, const Location& from_location, Dir direction)
+	{
+		AdventCheck(can_push(grid, from_location, direction));
+		const Location target = from_location + Location::dir(direction);
+		if (!grid[target].is_empty())
+		{
+			if (utils::is_horizontal(direction) || grid[target].is_small_box())
+			{
+				execute_push(grid, target, direction);
+			}
+			else
+			{
+				const Location offset_target = [&target, t = grid[target]]()
+					{;
+				if (t.is_left_box())
+				{
+					return target + Location::dir(utils::direction::right);
+				}
+				else if (t.is_right_box())
+				{
+					return target + Location::dir(utils::direction::left);
+				}
+				AdventUnreachable();
+				return target;
+					}();
+
+				execute_push(grid, target, direction);
+				execute_push(grid, offset_target, direction);
+			}
+		}
+
+		AdventCheck(grid[target].is_empty());
+
+		grid[target] = grid[from_location];
+		grid[from_location] = Tile::make_empty();
+
+		try_lock_box(grid, target);
+		for (const Location& n : target.neighbours())
+		{
+			try_lock_box(grid, n);
+		}
+
+		return;
+	}
+
 	void play_move(State& state, MoveList::const_iterator move_it)
 	{
 		const Dir move = *move_it;
-		const Location target = state.robot + Location::dir(move);
-		
-		Grid& grid = state.grid;
-		AdventCheck(grid.is_on_grid(target));
-
-		if (grid[target].is_locked())
+		if (can_push(state.grid, state.robot, move))
 		{
-			// Can't move there.
-			return;
+			execute_push(state.grid, state.robot, move);
+			state.robot += Location::dir(move);
 		}
-
-		if (grid[target].is_empty())
-		{
-			state.robot = target;
-			return;
-		}
-
-		AdventCheck(grid[target].is_box() && grid[target].is_moveable());
-
-		// Ray cast along the push to find an end-point: either an empty square, or something immoveable
-		Location filled_loc = target;
-		while (true)
-		{
-			filled_loc += Location::dir(move);
-			AdventCheck(grid.is_on_grid(filled_loc));
-
-			if (grid[filled_loc].is_locked())
-			{
-				// Can't push in this direction.
-				return;
-			}
-
-			if (grid[filled_loc].is_empty())
-			{
-				// Move a box here.
-				break;
-			}
-		}
-
-		grid[filled_loc] = Tile::make_box();
-		grid[target] = Tile::make_empty();
-		state.robot = target;
-
-		// Try locking the moved box and neighbours
-		for (const Location& l : filled_loc.neighbours())
-		{
-			try_lock_box(grid, l);
-		}
-		try_lock_box(grid, filled_loc);
 	}
 
 	// Stops when all boxes are locked
@@ -296,26 +385,36 @@ namespace
 
 	int64_t get_gps_score(const Grid& grid, const Location& loc)
 	{
-		AdventCheck(grid.is_on_grid(loc));
-		AdventCheck(grid[loc].is_box());
+		AdventCheck(grid[loc].is_gps_box());
 
 		const int max_y = grid.get_max_point().y - 1;
-		const int x = loc.x;
 		const int y = max_y - loc.y;
+		if (grid[loc].is_small_box())
+		{
+			const int x = loc.x;	
+			return 100 * y + x;
+		}
+
+		AdventCheck(grid[loc].is_left_box());
+		const int l_x = loc.x;
+		const int max_x = grid.get_max_point().x - 1;
+		const int r_x = max_x - (loc.x + 1);
+		const int x = std::max(l_x, r_x);
 		return 100 * y + x;
 	}
 
 	int64_t get_gps_score(const Grid& grid)
 	{
-		const auto boxes = grid.get_all_coordinates_by_predicate([](Tile t) {return t.is_box(); });
+		const auto boxes = grid.get_all_coordinates_by_predicate([](Tile t) {return t.is_gps_box(); });
 		auto score_view = stdv::transform(boxes, [&grid](const Location& l) {return get_gps_score(grid, l); });
 		const int64_t result = stdr::fold_left(score_view, int64_t{ 0 }, std::plus<int64_t>{});
 		return result;
 	}
 
-	int64_t solve_p1(std::istream& input)
+	template <AdventDay day>
+	int64_t solve_generic(std::istream& input)
 	{
-		State state = parse_state(input);
+		State state = parse_state<day>(input);
 		state = play_moves(std::move(state));
 #if DAY15DBG
 		log << "\nFinal grid:";
@@ -323,19 +422,29 @@ namespace
 #endif
 		return get_gps_score(state.grid);
 	}
+
+	int64_t solve_p1(std::istream& input)
+	{
+		return solve_generic<AdventDay::one>(input);
+	}
 }
 
 namespace
 {
 	int64_t solve_p2(std::istream& input)
 	{
-		return 0;
+		return solve_generic<AdventDay::two>(input);
 	}
 }
 
 ResultType day_fifteen_p1_a(std::istream& input)
 {
 	return solve_p1(input);
+}
+
+ResultType day_fifteen_p2_a(std::istream& input)
+{
+	return solve_p2(input);
 }
 
 ResultType advent_fifteen_p1()
