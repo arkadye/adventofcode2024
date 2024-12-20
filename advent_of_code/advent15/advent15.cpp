@@ -39,6 +39,8 @@ namespace
 		static constexpr uint8_t IS_ROBOT = 1 << 3;
 		static constexpr uint8_t IS_LEFT_BOX = 1 << 4;
 		static constexpr uint8_t IS_RIGHT_BOX = 1 << 5;
+		static constexpr uint8_t IS_GPS_BOX = IS_LEFT_BOX | IS_SMALL_BOX;
+		static constexpr uint8_t IS_ANY_BOX = IS_LEFT_BOX | IS_SMALL_BOX | IS_RIGHT_BOX;
 		uint8_t flags;
 		explicit Tile(uint8_t initial_flags) : flags{ initial_flags } {}
 	public:
@@ -52,14 +54,14 @@ namespace
 		bool is_moveable() const { return flags & IS_MOVEABLE; }
 		bool is_locked() const { return !is_moveable(); }
 		void lock() { flags = flags & ~IS_MOVEABLE; }
-		bool is_empty() const { return ((IS_SMALL_BOX | IS_WALL) & flags) == 0u; }
+		bool is_empty() const { return ((IS_ANY_BOX | IS_WALL) & flags) == 0u; }
 		bool is_wall() const { return flags & IS_WALL; }
 		bool is_small_box() const { return flags & IS_SMALL_BOX; }
 		bool is_robot() const { return flags & IS_ROBOT; }
 		bool is_left_box() const { return flags & IS_LEFT_BOX; }
 		bool is_right_box() const { return flags & IS_RIGHT_BOX; }
-		bool is_any_box() const { return flags & (IS_LEFT_BOX | IS_RIGHT_BOX | IS_SMALL_BOX); }
-		bool is_gps_box() const { return flags & (IS_LEFT_BOX | IS_SMALL_BOX); }
+		bool is_any_box() const { return flags & IS_ANY_BOX; }
+		bool is_gps_box() const { return flags & IS_GPS_BOX; }
 	};
 
 	using Grid = utils::grid<Tile>; 
@@ -94,7 +96,7 @@ namespace
 		if (t.is_right_box()) return (t.is_moveable() ? ']' : '}');
 		if (t.is_wall()) return '#';
 		if (t.is_robot()) return '@';
-		if (t.is_empty()) return ' ';
+		if (t.is_empty()) return '.';
 
 		return 'X';
 	}
@@ -329,16 +331,16 @@ namespace
 			{
 				const Location offset_target = [&target, t = grid[target]]()
 					{;
-				if (t.is_left_box())
-				{
-					return target + Location::dir(utils::direction::right);
-				}
-				else if (t.is_right_box())
-				{
-					return target + Location::dir(utils::direction::left);
-				}
-				AdventUnreachable();
-				return target;
+						if (t.is_left_box())
+						{
+							return target + Location::dir(utils::direction::right);
+						}
+						else if (t.is_right_box())
+						{
+							return target + Location::dir(utils::direction::left);
+						}
+						AdventUnreachable();
+						return target;
 					}();
 
 				execute_push(grid, target, direction);
@@ -356,6 +358,7 @@ namespace
 		{
 			try_lock_box(grid, n);
 		}
+
 
 		return;
 	}
@@ -377,8 +380,6 @@ namespace
 		for (MoveList::const_iterator it = begin(input.moves); it != end(input.moves); ++it)
 		{
 			play_move(input, it);
-			//log << "\nMove " << *it;
-			//print_state(input);
 		}
 		return input;
 	}
@@ -388,9 +389,9 @@ namespace
 		AdventCheck(grid[loc].is_gps_box());
 
 		const int max_y = grid.get_max_point().y - 1;
-		const int y = max_y - loc.y;
-		if (grid[loc].is_small_box())
+		if (grid[loc].is_gps_box())
 		{
+			const int y = max_y - loc.y;
 			const int x = loc.x;	
 			return 100 * y + x;
 		}
@@ -398,9 +399,15 @@ namespace
 		AdventCheck(grid[loc].is_left_box());
 		const int l_x = loc.x;
 		const int max_x = grid.get_max_point().x - 1;
-		const int r_x = max_x - (loc.x + 1);
-		const int x = std::max(l_x, r_x);
-		return 100 * y + x;
+		const int r_x = max_x - (loc.x+1);
+		const int x = std::min(l_x, r_x);
+		
+		const int t_y = loc.y;
+		const int b_y = max_y - loc.y;
+		const int y = b_y;// std::min(t_y, b_y);
+		const int result = 100 * y + x;
+		log << "\nBox at " << loc << " has score of " << result;
+		return result;
 	}
 
 	int64_t get_gps_score(const Grid& grid)
