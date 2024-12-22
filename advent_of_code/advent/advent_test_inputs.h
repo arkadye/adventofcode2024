@@ -509,3 +509,10 @@ R"(###############
 #.#.#.#.#.#.###
 #...#...#...###
 ###############)";
+
+test_data DAY_TWENTYTWO_A = "123";
+test_data DAY_TWENTYTWO_B = "1";
+test_data DAY_TWENTYTWO_C = "10";
+test_data DAY_TWENTYTWO_D = "100";
+test_data DAY_TWENTYTWO_E = "2024";
+test_data DAY_TWENTYTWO_F = advent::combine_inputs<1>(DAY_TWENTYTWO_B, DAY_TWENTYTWO_C, DAY_TWENTYTWO_D, DAY_TWENTYTWO_E);
