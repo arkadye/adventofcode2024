@@ -279,6 +279,11 @@ verification_test make_test(std::string name, TestFunc func, int64_t result)
 	return make_test(std::move(name), func, std::to_string(result));
 }
 
+verification_test make_test(std::string name, TestFunc func, uint64_t result)
+{
+	return make_test(std::move(name), func, std::to_string(result));
+}
+
 verification_test make_test(std::string name, TestFunc func, std::string result)
 {
 	return verification_test{ std::move(name),func,std::move(result) };
@@ -290,6 +295,11 @@ verification_test make_test(std::string name, TestFunc func, Dummy)
 }
 
 verification_test make_test(std::string name, TestFuncWithArg func, int64_t result, std::string arg)
+{
+	return make_test(std::move(name), func, std::to_string(result), std::move(arg));
+}
+
+verification_test make_test(std::string name, TestFuncWithArg func, uint64_t result, std::string arg)
 {
 	return make_test(std::move(name), func, std::to_string(result), std::move(arg));
 }
