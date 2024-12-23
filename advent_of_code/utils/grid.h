@@ -220,12 +220,24 @@ namespace utils
 			return result;
 		}
 
+		template <typename NodeType = char>
+		auto build(std::string_view sv)
+		{
+			return result(sv, [](char c) {return static_cast<NodeType>(c); });
+		}
+
 		auto build(std::istream& iss, const auto& char_to_node_fn)
 		{
 			using NodeType = decltype(char_to_node_fn(' '));
 			grid<NodeType> result;
 			result.build_from_stream(iss, char_to_node_fn);
 			return result;
+		}
+
+		template <typename NodeType = char>
+		auto build(std::istream& iss)
+		{
+			return result(sv, [](char c) {return static_cast<NodeType>(c); });
 		}
 
 		template <typename NodeType>
