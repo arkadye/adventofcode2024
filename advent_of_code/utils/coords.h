@@ -394,4 +394,10 @@ namespace utils
 		AdventCheck(mid == ',');
 		return in;
 	}
+
+	constexpr std::array<direction, 4> get_directions()
+	{
+		using enum direction;
+		return std::array<direction, 4>{ up, right, down, left };
+	}
 }
