@@ -150,12 +150,29 @@ set( UTILS_FILES
 	"utils/trim_string.h"
 )
 
-set (UTILS_SOURCE_FILES "utils/aoc_utils.natvis" "utils/isqrt.cpp" "utils/md5.cpp" "utils/parse_utils.cpp")
+set (UTILS_SOURCE_FILES
+	"utils/aoc_utils.natvis"
+	"utils/isqrt.cpp"
+	"utils/md5.cpp"
+	"utils/parse_utils.cpp"
+)
+
+set (UTILS_TEST_FILES
+	"utils/tests/utils_tests.h"
+	"utils/tests/small_vector_tests.h"
+)
+
+set (UTILS_TEST_SRC_FILES
+	"utils/tests/src/utils_tests.cpp"
+	"utils/tests/src/small_vector_tests.cpp"
+)
 
 source_group("utils" FILES ${UTILS_FILES})
 source_group("utils\\src" FILES ${UTILS_SOURCE_FILES})
+source_group("utils\\tests" FILES ${UTILS_TEST_FILES})
+source_group("utils\\tests\\src" FILES ${UTILS_TEST_SRC_FILES})
 
-target_sources(${EXENAME} PUBLIC ${UTILS_FILES} ${UTILS_SOURCE_FILES})
+target_sources(${EXENAME} PUBLIC ${UTILS_FILES} ${UTILS_SOURCE_FILES} ${UTILS_TEST_FILES} ${UTILS_TEST_SRC_FILES})
 
 # Add extra files as extra parameters
 function(add_day day_num)
