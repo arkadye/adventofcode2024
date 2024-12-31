@@ -491,6 +491,33 @@ namespace utils
 		auto rend() const { sort(); return m_data.crend(); }
 		auto crbegin() const { sort(); return m_data.crbegin(); }
 		auto crend() const { sort(); return m_data.crend(); }
+
+		template <typename OtherT, typename OtherPred, std::size_t OtherSize>
+		auto operator<=>(const sorted_vector<OtherT, OtherPred, OtherSize>& other) const noexcept
+		{
+			sort();
+			other.sort();
+			return (m_data <=> other.m_data);
+		}
+
+		template <typename OtherT, typename OtherPred, std::size_t OtherSize>
+		bool operator==(const sorted_vector<OtherT, OtherPred, OtherSize>& other) const noexcept
+		{
+			sort();
+			other.sort();
+			return (m_data == other.m_data);
+		}
+
+		// Futz with underlying values
+		const utils::small_vector<T, BufferSize>& get_underlying() const&
+		{
+			return m_data;
+		}
+
+		utils::small_vector<T, BufferSize>&& get_underlying()&&
+		{
+			return std::move(m_data);
+		}
 	};
 
 	template <std::size_t BufferSize, typename T, typename BinaryPredicate>
@@ -783,38 +810,38 @@ namespace utils
 	};
 }
 
-template <typename T, typename BinaryPred>
-inline auto begin(utils::sorted_vector<T,BinaryPred>& sv) { return sv.begin(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto begin(utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.begin(); }
 
-template <typename T, typename BinaryPred>
-inline auto begin(const utils::sorted_vector<T,BinaryPred>& sv) { return sv.begin(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto begin(const utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.begin(); }
 
-template <typename T, typename BinaryPred>
-inline auto end(utils::sorted_vector<T,BinaryPred>& sv) { return sv.end(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto end(utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.end(); }
 
-template <typename T, typename BinaryPred>
-inline auto end(const utils::sorted_vector<T,BinaryPred>& sv) { return sv.end(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto end(const utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.end(); }
 
-template <typename T, typename BinaryPred>
-inline auto rbegin(utils::sorted_vector<T,BinaryPred>& sv) { return sv.rbegin(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto rbegin(utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.rbegin(); }
 
-template <typename T, typename BinaryPred>
-inline auto rbegin(const utils::sorted_vector<T,BinaryPred>& sv) { return sv.rbegin(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto rbegin(const utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.rbegin(); }
 
-template <typename T, typename BinaryPred>
-inline auto rend(utils::sorted_vector<T,BinaryPred>& sv) { return sv.rend(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto rend(utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.rend(); }
 
-template <typename T, typename BinaryPred>
-inline auto rend(const utils::sorted_vector<T,BinaryPred>& sv) { return sv.rend(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto rend(const utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.rend(); }
 
-template <typename T, typename BinaryPred>
-inline auto cbegin(const utils::sorted_vector<T,BinaryPred>& sv) { return sv.cbegin(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto cbegin(const utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.cbegin(); }
 
-template <typename T, typename BinaryPred>
-inline auto cend(const utils::sorted_vector<T,BinaryPred>& sv) { return sv.cend(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto cend(const utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.cend(); }
 
-template <typename T, typename BinaryPred>
-inline auto crbegin(const utils::sorted_vector<T,BinaryPred>& sv) { return sv.crbegin(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto crbegin(const utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.crbegin(); }
 
-template <typename T, typename BinaryPred>
-inline auto crend(const utils::sorted_vector<T,BinaryPred>& sv) { return sv.crend(); }
+template <typename T, typename BinaryPred, std::size_t Size>
+inline auto crend(const utils::sorted_vector<T,BinaryPred, Size>& sv) { return sv.crend(); }
