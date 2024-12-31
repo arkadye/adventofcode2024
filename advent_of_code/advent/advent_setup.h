@@ -127,7 +127,7 @@ static const verification_test tests[] =
 	TESTCASE_WITH_ARG(day_sixteen_p1_a, DAY_SIXTEEN_A, 7036),
 	TESTCASE_WITH_ARG(day_sixteen_p1_a, DAY_SIXTEEN_B, 11048),
 	TESTCASE_WITH_ARG(day_sixteen_p2_a, DAY_SIXTEEN_A, 45),
-	TESTCASE_WITH_ARG(day_sixteen_p2_a, DAY_SIXTEEN_B, 62),
+	TESTCASE_WITH_ARG(day_sixteen_p2_a, DAY_SIXTEEN_B, 64),
 	DAY(sixteen, DAY_16_1_SOLUTION, DAY_16_2_SOLUTION),
 	TESTCASE_WITH_ARG(day_seventeen_p1_b,DAY_SEVENTEEN_A,1),
 	TESTCASE_WITH_ARG(day_seventeen_p1,DAY_SEVENTEEN_B,"0,1,2"),
@@ -200,6 +200,8 @@ static const verification_test tests[] =
 	TESTCASE_WITH_ARG(day_twentytwo_p1<2000>, DAY_TWENTYTWO_E, 8667524),
 	TESTCASE_WITH_ARG(day_twentytwo_p1<2000>, DAY_TWENTYTWO_F, 37327623),
 	DAY(twentytwo, DAY_22_1_SOLUTION, DAY_22_2_SOLUTION),
+	TESTCASE_WITH_ARG(day_twentythree_p1,DAY_TWENTYTHREE_A, 7),
+	TESTCASE_WITH_ARG(day_twentythree_p2,DAY_TWENTYTHREE_A, "co,de,ka,ta"),
 	DAY(twentythree, DAY_23_1_SOLUTION, DAY_23_2_SOLUTION),
 	DAY(twentyfour, DAY_24_1_SOLUTION, DAY_24_2_SOLUTION),
 	DAY(twentyfive, DAY_25_1_SOLUTION,"MERRY CHRISTMAS!")
