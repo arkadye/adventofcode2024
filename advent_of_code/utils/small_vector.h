@@ -47,12 +47,13 @@ namespace utils
 		using difference_type = std::ptrdiff_t;
 		using reference = value_type&;
 		using const_reference = const value_type&;
-		using pointer = typename std::allocator_traits<allocator_type>::pointer;
-		using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
+		using pointer = typename std::allocator_traits<ALLOC>::pointer;
+		using const_pointer = typename std::allocator_traits<ALLOC>::const_pointer;
 		using iterator = T*;
 		using const_iterator = const T*;
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+		using iterator_type = std::contiguous_iterator_tag;
 
 		// Constructors
 		CONSTEXPR small_vector() noexcept(noexcept(allocator_type())) : small_vector(allocator_type()) {}
@@ -317,7 +318,7 @@ namespace utils
 			}
 			else
 			{
-				buffer_pair_operation(from, to, [](T* from_it, T* to_it) {*to_it = *from_it; });
+				buffer_pair_operation(from, to, [](T* from_it, T* to_it) {*to_it = std::move(*from_it); });
 			}
 		}
 
@@ -371,7 +372,7 @@ namespace utils
 					}
 				}
 
-				AdventCheck(from.size() <= to.unitialised_memory.size());
+				AdventCheck(from.size() <= to.uninitialised_memory.size());
 				if (!to.uninitialised_memory.empty())
 				{
 					move_buffer_to_raw_memory(from, to.uninitialised_memory);
@@ -437,24 +438,26 @@ namespace utils
 				return GapDescription{ InitialisedBuffer{},RawMemory{end(),end() + gap_size} };
 			}
 
+			T* const source = const_cast<T*>(pos);
+			T* const target = const_cast<T*>(pos) + gap_size;
+
 			if constexpr (std::is_trivially_copyable_v<T>)
 			{
-				T* const source = const_cast<T*>(pos);
-				T* const target = const_cast<T*>(pos) + gap_size;
 				const std::size_t bytes = distance_from_end * sizeof(T);
 				std::memmove(target, source, bytes);
 				return GapDescription{ InitialisedBuffer{},RawMemory{source,target} };
 			}
 			else
 			{
-				for (size_type fwd_i = 0;fwd_i<gap_size;++fwd_i)
+				for (T* one_past_elem_to_move = data() + size(); one_past_elem_to_move != pos; --one_past_elem_to_move)
 				{
-					const size_type i = gap_size - fwd_i - 1;
-					const size_type from_idx = distance_from_start + i;
-					const size_type target_idx = from_idx + gap_size;
-					T* from_loc = data() + from_idx;
-					T* to_loc = data() + target_idx;
-					const InitialisedBuffer from_buf{from_loc,from_loc+1 };
+					AdventCheck(one_past_elem_to_move > pos);
+					T* from_loc = one_past_elem_to_move - 1;
+					T* to_loc = from_loc + gap_size;
+					const std::size_t target_idx = std::distance(data(), to_loc);
+					AdventCheck(target_idx < capacity());
+					const bool target_initialized = (target_idx >= size());
+					const InitialisedBuffer from_buf{ from_loc,from_loc + 1 };
 					if (target_idx < size())
 					{
 						const InitialisedBuffer to_buf{ to_loc,to_loc + 1 };
@@ -467,8 +470,8 @@ namespace utils
 					}
 				}
 				return distance_from_end >= gap_size ?
-					GapDescription{ InitialisedBuffer{pos,pos + gap_size},RawMemory{} } :
-					GapDescription{ InitialisedBuffer{pos,end()},RawMemory{end(),pos + gap_size} };
+					GapDescription{ InitialisedBuffer{source,target},RawMemory{} } :
+					GapDescription{ InitialisedBuffer{source,end()},RawMemory{end(),target} };
 			}
 		}
 
