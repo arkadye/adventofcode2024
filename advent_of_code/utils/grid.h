@@ -237,7 +237,7 @@ namespace utils
 		template <typename NodeType = char>
 		auto build(std::istream& iss)
 		{
-			return result(sv, [](char c) {return static_cast<NodeType>(c); });
+			return result(iss, [](char c) {return static_cast<NodeType>(c); });
 		}
 
 		template <typename NodeType>
