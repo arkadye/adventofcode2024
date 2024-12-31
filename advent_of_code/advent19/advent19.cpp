@@ -4,7 +4,7 @@
 #ifdef FORCE_DAY19DBG
 #define DAY19DBG 1
 #else
-#define ENABLE_DAY19DBG 1
+#define ENABLE_DAY19DBG 0
 #ifdef NDEBUG
 #define DAY19DBG 0
 #else
