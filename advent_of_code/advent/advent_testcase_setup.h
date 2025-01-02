@@ -6,6 +6,8 @@
 #include <optional>
 #include <variant>
 
+#include "advent/advent_types.h"
+
 using TestFunc = std::function<ResultType()>;
 using TestFuncWithArg = std::function<ResultType(std::istream&)>;
 

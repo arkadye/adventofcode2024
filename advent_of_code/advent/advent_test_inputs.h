@@ -517,6 +517,40 @@ test_data DAY_TWENTYTWO_D = "100";
 test_data DAY_TWENTYTWO_E = "2024";
 test_data DAY_TWENTYTWO_F = advent::combine_inputs<1>(DAY_TWENTYTWO_B, DAY_TWENTYTWO_C, DAY_TWENTYTWO_D, DAY_TWENTYTWO_E);
 
+test_data DAY_TWENTYTHREE_A =
+R"(kh-tc
+qp-kh
+de-cg
+ka-co
+yn-aq
+qp-ub
+cg-tb
+vc-aq
+tb-ka
+wh-tc
+yn-cg
+kh-ub
+ta-co
+de-co
+tc-td
+tb-wq
+wh-td
+ta-ka
+td-qp
+aq-cg
+wq-ub
+ub-vc
+de-ta
+wq-aq
+wq-vc
+wh-yn
+ka-de
+kh-ta
+co-tc
+wh-qp
+tb-vc
+td-yn)";
+
 test_data DAY_TWENTYFOUR_A =
 R"(x00: 1
 x01: 1

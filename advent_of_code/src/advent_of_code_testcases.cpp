@@ -10,10 +10,12 @@
 #include <cassert>
 #include <numeric>
 
-#include "../advent/advent_of_code.h"
-#include "../advent/advent_headers.h"
-#include "../advent/advent_setup.h"
-#include "../advent/advent_assert.h"
+#include "advent/advent_of_code.h"
+#include "advent/advent_headers.h"
+#include "advent/advent_setup.h"
+#include "advent/advent_assert.h"
+
+#include "utils/tests/utils_tests.h"
 
 namespace
 {
@@ -225,14 +227,26 @@ test_result run_test(const verification_test& test, const std::vector<std::strin
 
 bool verify_all(const std::vector<std::string_view>& filter)
 {
+#if UTILS_TESTING
+	const std::size_t NUM_TESTS = std::size(tests) + utils::testing::get_all_tests().size();
+	std::vector<test_result> results;
+	results.reserve(NUM_TESTS);
+	results.resize(std::size(tests));
+#else
 	constexpr auto NUM_TESTS = std::size(tests);
 	auto result_ptr = std::make_unique<std::array<test_result, NUM_TESTS>>();
 	auto& results = *result_ptr;
-	std::ranges::transform(tests, begin(results),
-		[&filter](const verification_test& test)
+#endif
+
+	auto test_lambda = [&filter](const verification_test& test)
 		{
 			return run_test(test, filter);
-		});
+		};
+	std::ranges::transform(tests, begin(results),test_lambda);
+
+#if UTILS_TESTING
+	std::ranges::transform(utils::testing::get_all_tests(), std::back_inserter(results), test_lambda);
+#endif
 
 	auto result_to_string = [&filter](const test_result& result)
 	{
