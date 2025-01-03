@@ -20,6 +20,7 @@ namespace utils
 		using iterator = typename utils::small_vector<T,BufferSize>::iterator;
 		using const_iterator = typename utils::small_vector<T,BufferSize>::const_iterator;
 		using value_type = T;
+		using size_type = utils::small_vector<T, BufferSize>::size_type;
 		bool can_insert_at_pos(const_iterator pos, const T& value) const noexcept
 		{
 			const bool check_after = (pos == m_data.cend() || !m_compare(*pos, value));

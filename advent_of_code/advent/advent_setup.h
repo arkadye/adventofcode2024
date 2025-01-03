@@ -232,6 +232,8 @@ static const verification_test tests[] =
 	TESTCASE_WITH_ARG(day_twentythree_p1,DAY_TWENTYTHREE_A, 7),
 	TESTCASE_WITH_ARG(day_twentythree_p2,DAY_TWENTYTHREE_A, "co,de,ka,ta"),
 	DAY(twentythree, DAY_23_1_SOLUTION, DAY_23_2_SOLUTION),
+	TESTCASE_WITH_ARG(day_twentyfour_p1, DAY_TWENTYFOUR_A,4),
+	TESTCASE_WITH_ARG(day_twentyfour_p1, DAY_TWENTYFOUR_B,2024),
 	DAY(twentyfour, DAY_24_1_SOLUTION, DAY_24_2_SOLUTION),
 	DAY(twentyfive, DAY_25_1_SOLUTION,"MERRY CHRISTMAS!")
 };
