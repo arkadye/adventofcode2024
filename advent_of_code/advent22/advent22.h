@@ -10,5 +10,7 @@ namespace advent_22
 template <std::size_t STEPS>
 ResultType day_twentytwo_p1(std::istream& input) { return advent_22::p1(input, STEPS); }
 
+ResultType day_twentytwo_p2(std::istream& input);
+
 ResultType advent_twentytwo_p1();
 ResultType advent_twentytwo_p2();

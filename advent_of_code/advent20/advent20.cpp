@@ -27,6 +27,8 @@ namespace
 
 #include "grid.h"
 
+#include <map>
+
 namespace
 {
 	enum class TileType : char
@@ -139,55 +141,65 @@ namespace
 		return result;
 	}
 
-	int score_cheat(const Grid& grid, utils::coords location, utils::direction direction)
+	int score_cheat(const Grid& grid, const utils::coords& start_location, const utils::coords& end_location, int max_cheat)
 	{
 		constexpr int CHEAT_FAILED = std::numeric_limits<int>::min();
-		const Tile start_tile = grid[location];
+
+		const int cheat_time = start_location.manhatten_distance(end_location);
+		if (cheat_time > max_cheat) return CHEAT_FAILED;
+		
+		const Tile start_tile = grid[start_location];
 		if (start_tile.type == TileType::wall) return CHEAT_FAILED;
 
-		const utils::coords target_loc = location + 2 * utils::coords::dir(direction);
-		if (!grid.is_on_grid(target_loc)) return CHEAT_FAILED; // Fail if cheat takes you out of bounds.
-		const Tile target_tile = grid[target_loc];
+		if (!grid.is_on_grid(end_location)) return CHEAT_FAILED; // Fail if cheat takes you out of bounds.
+		const Tile target_tile = grid[end_location];
 		if (target_tile.type == TileType::wall) return CHEAT_FAILED;
 
-		const int non_cheated_score = start_tile.steps_to_end - 2;
+		const int non_cheated_score = start_tile.steps_to_end - cheat_time;
 		return non_cheated_score - target_tile.steps_to_end;
 	}
 
-	int64_t count_cheats_at_location(const Grid& grid, utils::coords location, int threshold)
+	int64_t count_cheats_at_location(const Grid& grid, const utils::coords& location, int threshold, int max_cheat)
 	{
-		using enum utils::direction;
-		constexpr std::array<utils::direction, 4> directions{ up, right, down, left };
-		return stdr::count_if(directions, [threshold](int score) {return score >= threshold; }, [&grid, location](utils::direction dir) {return score_cheat(grid, location, dir); });
+		const utils::coords cheat_offsets{ max_cheat };
+		auto target_candidates = utils::coords_iterators::get_range(location - cheat_offsets, location + cheat_offsets);
+		return stdr::count_if(target_candidates, [threshold](int score) {return score >= threshold; }, [&grid, location, max_cheat](utils::coords target) {return score_cheat(grid, location, target, max_cheat); });
 	}
 
-	int64_t count_cheats(const Grid& grid, int threshold)
+	int64_t count_cheats(const Grid& grid, int threshold, int max_cheat)
 	{
 		return stdr::fold_left(
 			utils::coords_iterators::elem_range{ grid.get_max_point() }
-			| stdv::transform([&grid, threshold](utils::coords loc) {return count_cheats_at_location(grid, loc, threshold); }),
+			| stdv::transform([&grid, threshold, max_cheat](utils::coords loc) {return count_cheats_at_location(grid, loc, threshold, max_cheat); }),
 				0,
 				std::plus<int64_t>{});
 	}
 
-	int64_t solve_p1(std::istream& input, int cheat_threshold)
+	int64_t solve_generic(std::istream& input, int cheat_threshold, int max_cheat)
 	{
 		const Grid grid = parse_grid(input);
-		return count_cheats(grid, cheat_threshold);
+		return count_cheats(grid, cheat_threshold, max_cheat);
 	}
-}
 
-namespace
-{
-	int64_t solve_p2(std::istream& input)
+	int64_t solve_p1(std::istream& input, int cheat_threshold)
 	{
-		return 0;
+		return solve_generic(input, cheat_threshold, 2);
+	}
+
+	int64_t solve_p2(std::istream& input, int cheat_threshold)
+	{
+		return solve_generic(input, cheat_threshold, 20);
 	}
 }
 
 ResultType advent_20::p1(std::istream& input, int threshold)
 {
 	return solve_p1(input, threshold);
+}
+
+ResultType advent_20::p2(std::istream& input, int threshold)
+{
+	return solve_p2(input, threshold);
 }
 
 ResultType advent_twenty_p1()
@@ -199,7 +211,7 @@ ResultType advent_twenty_p1()
 ResultType advent_twenty_p2()
 {
 	auto input = advent::open_puzzle_input(20);
-	return solve_p2(input);
+	return solve_p2(input,100);
 }
 
 #undef DAY20DBG

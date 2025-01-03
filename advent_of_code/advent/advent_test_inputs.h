@@ -517,6 +517,8 @@ test_data DAY_TWENTYTWO_D = "100";
 test_data DAY_TWENTYTWO_E = "2024";
 test_data DAY_TWENTYTWO_F = advent::combine_inputs<1>(DAY_TWENTYTWO_B, DAY_TWENTYTWO_C, DAY_TWENTYTWO_D, DAY_TWENTYTWO_E);
 
+test_data DAY_TWENTYTWO_G = "1\n2\n3\n2024";
+
 test_data DAY_TWENTYTHREE_A =
 R"(kh-tc
 qp-kh
